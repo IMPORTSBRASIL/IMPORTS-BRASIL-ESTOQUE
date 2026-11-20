@@ -102,7 +102,10 @@ etiquetas e relatórios continuam iguais).
   (antes do inventário completo), com cada produto agrupado, o total somado de todas as
   variações, o detalhe `tamanho × quantidade`, o mínimo somado e a situação. Ela também sai
   no PDF (botão **Gerar PDF**), junto com o resto do relatório.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.3).
+- **Tamanhos / Variações:** no cadastro de **Novo produto** (aba Estoque), o campo agora se
+  chama **Tamanhos / Variações** e aceita qualquer variação, não só letra de tamanho —
+  por exemplo `P, M, G` ou `10ml, 20ml`.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.4).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

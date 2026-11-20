@@ -398,7 +398,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.3</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.4</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -407,7 +407,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.3</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.4</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -1071,7 +1071,7 @@ function vEstoque(){
   var list=S.products.filter(function(p){var t=(p.sku+' '+p.name+' '+(p.sizes||[]).join(' ')+' '+(p.notes||'')).toLowerCase();return t.indexOf(q.toLowerCase())>-1});
   var rows=list.map(function(p){return '<tr><td>'+esc(p.sku)+'</td><td>'+esc(p.name)+'</td><td>'+esc((p.sizes||[]).join(', ')||'—')+'</td><td>'+esc(p.notes||'—')+'</td><td class="n">'+p.qty+'</td><td class="n">'+p.min+'</td><td>'+status(p)+'</td><td><button class="btn ghost sm" onclick="openEdit(\''+p.id+'\')">Editar</button> <button class="btn danger sm" onclick="delProduct(\''+p.id+'\')">Excluir</button></td></tr>'}).join('');
   return '<div class="card"><h2>Novo produto</h2><p style="color:var(--muted);font-size:13px;margin:0 0 10px">O código será gerado automaticamente ao salvar.</p><div class="row">'+
-  '<label style="flex:2 1 200px">Nome<input id="p-name"></label><label>Tamanhos<input id="p-sizes" placeholder="Ex.: P, M, G, GG"></label>'+
+  '<label style="flex:2 1 200px">Nome<input id="p-name"></label><label>Tamanhos / Variações<input id="p-sizes" placeholder="Ex.: P, M, G, GG ou 10ml, 20ml"></label>'+
   '<label style="flex:2 1 220px">Observações<textarea id="p-notes" placeholder="Detalhes adicionais do produto"></textarea></label>'+
   '<label>Qtd. inicial<input id="p-qty" type="number" min="0" value="0"></label><label>Estoque mínimo<input id="p-min" type="number" min="0" value="0"></label>'+
   '<button class="btn" onclick="addProduct()">Salvar produto</button></div></div>'+
