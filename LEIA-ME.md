@@ -72,6 +72,7 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
   Se a quantidade for alterada, a diferença entra no Histórico como "Ajuste de estoque".
 - **Produtos em ordem alfabética** (A–Z, ignorando acentos) em todas as telas.
 - **Pedidos:** novo campo obrigatório "Cidade de destino" (com sugestões das cidades já usadas). Pedidos antigos continuam funcionando, sem cidade.
+- **Excluir pedido cancelado:** pedidos cancelados ganham o botão "Excluir pedido" (pede confirmação; pedidos pendentes ou atendidos não podem ser excluídos).
 - **Nova aba Etiquetas:** gera PDF com uma etiqueta por volume (cidade em destaque, destinatário, endereço, pedido, data e código de barras Code 128 com o nº do pedido).
   Tamanhos: 100×150 mm (padrão de envio), 100×100, 100×70, 60×40 ou personalizado. Em cada pedido há também o botão "Etiqueta de envio".
   Na impressão: escolha a impressora térmica, o papel com o mesmo tamanho da etiqueta e escala 100%.

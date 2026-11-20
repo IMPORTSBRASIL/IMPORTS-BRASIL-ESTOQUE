@@ -358,6 +358,20 @@ async function cancelOrder(id){
     toast('Pedido cancelado.');
   }catch(e){fail(e)}
 }
+async function delOrder(id){
+  var o=S.orders.find(function(x){return x.id===id});
+  if(!o||o.status!=='Cancelado')return toast('Só é possível excluir pedidos cancelados.');
+  if(!confirm('Excluir definitivamente o pedido '+o.num+' ('+o.client+')? Esta ação não pode ser desfeita.'))return;
+  try{
+    await db.runTransaction(async function(t){
+      var ref=db.collection('orders').doc(id),d=await t.get(ref);
+      if(!d.exists)throw new Error('Este pedido já foi excluído.');
+      if(d.data().status!=='Cancelado')throw new Error('Este pedido não está mais cancelado.');
+      t.delete(ref);
+    });
+    toast('Pedido '+o.num+' excluído.');
+  }catch(e){fail(e)}
+}
 async function delMovement(id){
   if(!S.moves.some(function(m){return m.id===id}))return toast('Esta movimentação já foi removida.');
   if(!confirm('Apagar esta movimentação do histórico? O saldo do estoque e os pedidos não serão alterados.'))return;
@@ -654,7 +668,7 @@ function vPedidos(){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
     var items=o.items.map(function(i){var p=prod(i.pid);return '<li>'+(p?esc(p.name):'Produto removido')+' × '+i.qty+'</li>'}).join('');
     return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+'</small>'+(o.city?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+'<ul>'+items+'</ul>'+
-    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button>':'')+'</div>';
+    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button>':'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button>')+'</div>';
   }).join('');
   var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
   var dlc='<datalist id="cities">'+cities.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist>';
