@@ -409,7 +409,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.8</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.9</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -418,7 +418,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.8</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.9</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -1024,6 +1024,88 @@ function makeLabelsPdf(d,w,h,vols){
   for(var v=1;v<=vols;v++){var pg=new Page(W,H);drawLabel(pg,d,w,h,v,vols);pages.push(pg)}
   return buildPdf(pages,W,H);
 }
+/* ---------- Pedido em PDF (documento do pedido, para enviar ao cliente) ---------- */
+function buildOrderPdf(o){
+  var W=595.28,H=841.89,M=44,g=12;
+  var pages=[],pg=null,y=0;
+  var rows=(o.items||[]).map(function(i){
+    var p=prod(i.pid),sz='';
+    if(p&&p.sizes&&p.sizes.length)sz=' ('+p.sizes.join(', ')+')';
+    return {name:(p?p.name:'Produto removido')+sz,sku:p?p.sku:'—',qty:i.qty};
+  });
+  var units=rows.reduce(function(s,r){return s+(Number(r.qty)||0)},0);
+  var statusTxt=o.status||'Pendente';
+  var prodW=W-2*M-26-158,skuX=W-M-158,qtyX=W-M-10;
+  function header(){
+    pg.gray(0.12);pg.rect(0,0,W,72);pg.gray(1);
+    pg.text('IMPORTS BRASIL',M,31,19,true,'l');
+    pg.text('Pedido de venda',M,48,9.5,false,'l');
+    pg.text('PEDIDO',W-M,23,8,false,'r');
+    pg.text(o.num||'—',W-M,45,15,true,'r',150);
+    pg.gray(0);
+    y=72+28;
+  }
+  function field(x,label,value,size,maxW){
+    pg.gray(0.45);pg.text(label,x,y+8,7.5,false,'l');pg.gray(0);
+    var f=fitLines(value==null||value===''?'—':String(value),size,Math.max(8,size*0.72),true,maxW,2),yy=y+8+size*1.3;
+    f.lines.forEach(function(l){pg.text(l,x,yy,f.size,true,'l',maxW);yy+=f.size*1.22});
+    return yy-y+2;
+  }
+  function info(){
+    var cw=(W-2*M-g)/2,x2=M+cw+g;
+    y+=Math.max(field(M,'CLIENTE',o.client,12,cw),field(x2,'CIDADE DE DESTINO',o.city,12,cw))+g*0.4;
+    y+=Math.max(field(M,'DATA DO PEDIDO',new Date(o.date).toLocaleDateString('pt-BR'),10,cw),field(x2,'SITUAÇÃO',statusTxt,10,cw))+g*0.4;
+    if(o.by)y+=field(M,'CRIADO POR',o.by,9,cw)+g*0.4;
+    pg.hline(M,W-M,y+4,0.8);y+=g+8;
+  }
+  function tableHead(){
+    pg.gray(0.93);pg.rect(M,y,W-2*M,20);pg.gray(0);
+    pg.text('#',M+8,y+13.5,8.5,true,'l');
+    pg.text('PRODUTO',M+26,y+13.5,8.5,true,'l');
+    pg.text('CÓDIGO',skuX,y+13.5,8.5,true,'l');
+    pg.text('QTD.',qtyX,y+13.5,8.5,true,'r');
+    y+=20;
+  }
+  function newPage(withInfo){
+    pg=new Page(W,H);pages.push(pg);header();
+    if(withInfo)info();else tableHead();
+  }
+  newPage(true);tableHead();
+  rows.forEach(function(r,k){
+    var nm=fitLines(r.name,10,8,false,prodW,2),rh=Math.max(22,nm.lines.length*12+10);
+    if(y+rh>H-M-58)newPage(false);
+    if(k%2===1){pg.gray(0.965);pg.rect(M,y,W-2*M,rh);pg.gray(0)}
+    var base=y+rh/2+3.5,first=base-((nm.lines.length-1)*12)/2;
+    pg.text(String(k+1),M+8,base,9,false,'l');
+    nm.lines.forEach(function(l,i){pg.text(l,M+26,first+i*12,nm.size,false,'l',prodW)});
+    pg.text(r.sku,skuX,base,9,false,'l',140);
+    pg.text(String(r.qty),qtyX,base,10,true,'r');
+    pg.gray(0.88);pg.hline(M,W-M,y+rh,0.4);pg.gray(0);
+    y+=rh;
+  });
+  if(!rows.length){pg.text('Nenhum item neste pedido.',M,y+16,10,false,'l');y+=24}
+  if(y>H-M-74)newPage(false);
+  y+=12;
+  pg.text(rows.length+' item(ns) · '+units+' unidade(s)',M,y+16,10,false,'l',W-2*M-230);
+  pg.gray(0.12);pg.rect(qtyX-196,y,200,26);pg.gray(1);
+  pg.text('TOTAL: '+units+' un.',W-M-12,y+17,11,true,'r',180);
+  pg.gray(0);
+  var gen=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+  pages.forEach(function(p,k){
+    p.gray(0.45);p.hline(M,W-M,H-M-26,0.6);
+    p.text('IMPORTS BRASIL · documento gerado em '+gen,M,H-M-8,8,false,'l',W-2*M-100);
+    p.text('Página '+(k+1)+' de '+pages.length,W-M,H-M-8,8,false,'r');
+    p.gray(0);
+  });
+  return {blob:buildPdf(pages,W,H),name:'pedido-'+String(o.num||'sem-numero').replace(/[^a-z0-9-]+/gi,'-')+'.pdf'};
+}
+function orderPdf(id){
+  var o=S.orders.find(function(x){return x.id===id});
+  if(!o)return toast('Pedido não encontrado.');
+  var r=buildOrderPdf(o),url=URL.createObjectURL(r.blob),win=window.open(url,'_blank');
+  if(!win){toast('O navegador bloqueou a janela. Baixando o PDF…');saveBlob(url,r.name)}
+  setTimeout(function(){URL.revokeObjectURL(url)},120000);
+}
 function labelSize(){
   var id=val('e-size'),s=LBL_SIZES.filter(function(x){return x[0]===id})[0]||LBL_SIZES[0];
   if(s[0]==='custom')return [parseFloat(val('e-w')),parseFloat(val('e-h'))];
@@ -1154,7 +1236,7 @@ function vPedidos(){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
     var items=o.items.map(function(i){var p=prod(i.pid);return '<li>'+(p?esc(p.name)+sizeOf(p):'Produto removido')+' × '+i.qty+'</li>'}).join('');
     return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+'</small>'+(o.city?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+'<ul>'+items+'</ul>'+
-    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button>':'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button>')+'</div>';
+    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button> ':'')+'<button class="btn ghost sm" onclick="orderPdf(\''+o.id+'\')">Pedido em PDF</button> '+(o.status==='Cancelado'?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button>':'')+'</div>';
   }).join('');
   var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
   var dlc='<datalist id="cities">'+cities.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist>';

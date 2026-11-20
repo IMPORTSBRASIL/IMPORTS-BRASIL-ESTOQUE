@@ -124,7 +124,12 @@ etiquetas e relatórios continuam iguais).
 - **Ícone e nome ao instalar no celular:** quando o site é adicionado à tela inicial
   (Android: "Instalar app" / iPhone: "Adicionar à Tela de Início"), o atalho agora usa a
   **logo da empresa** como ícone e aparece com o nome **IMPORTS BRASIL**.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.8).
+- **Pedido em PDF:** cada pedido criado na aba **Pedidos** agora tem o botão
+  **Pedido em PDF**. Ele gera o documento do pedido (com o nome da empresa no topo, número,
+  cliente, cidade de destino, data, situação, quem lançou e a lista de itens com código e
+  quantidade) pronto para salvar, imprimir ou enviar ao cliente no WhatsApp. O PDF abre em
+  uma aba nova; se o celular bloquear a janela, o arquivo é baixado direto.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.9).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
