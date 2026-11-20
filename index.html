@@ -99,6 +99,19 @@ small{font-size:12.5px}
 .listhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .listhead h2{margin:0}
 
+/* ---------- soma por produto ---------- */
+.groups{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.group{border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;background:var(--surface-soft)}
+.ghead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ghead strong{font-size:14px;letter-spacing:-.01em}
+.gsum{display:flex;align-items:baseline;gap:4px;flex:0 0 auto}
+.gsum b{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.gsum span{font-size:11.5px;color:var(--muted)}
+.gmeta{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gsizes{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0;padding:0}
+.gsizes li{font-size:12px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.gsizes li b{font-weight:700;color:var(--ink)}
+
 /* ---------- calculadora ---------- */
 .calcpop{
   position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));z-index:40;
@@ -368,7 +381,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.0</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.2</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -377,7 +390,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.0</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.2</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -433,7 +446,8 @@ function fail(e){
   toast(m||'Ocorreu um erro. Tente novamente.');
 }
 function status(p){return p.qty<=0?'<span class="tag t-bad">Zerado</span>':p.qty<=p.min?'<span class="tag t-warn">Baixo</span>':'<span class="tag t-ok">Em estoque</span>'}
-function opts(){return S.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.sku)+' – '+esc(p.name)+' ('+p.qty+')</option>'}).join('')}
+function sizeOf(p){return (p&&p.sizes&&p.sizes.length)?' ('+esc(p.sizes.join(', '))+')':''}
+function opts(){return S.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.sku)+' – '+esc(p.name)+sizeOf(p)+' · '+p.qty+' un.</option>'}).join('')}
 function newMove(pid,p,type,qty,ref){return {date:Date.now(),type:type,pid:pid,name:p.name,sku:p.sku,qty:qty,ref:ref||'',by:user?user.email:''}}
 function go(t){tab=t;render()}
 
@@ -715,6 +729,44 @@ function toggleList(){
   if(b){b.textContent=willOpen?'Recolher':'Expandir';b.setAttribute('aria-expanded',willOpen?'true':'false')}
   var head=el.parentNode;
   if(!willOpen&&head&&head.scrollIntoView)head.scrollIntoView({block:'start',behavior:'smooth'});
+}
+
+/* ---------- soma por produto (agrupa as variações) ---------- */
+var grpOpen=true;
+function normKey(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
+function groupsOf(){
+  var map={},out=[];
+  S.products.forEach(function(p){
+    var nm=String(p.name||'').trim()||'Sem nome';
+    var k=normKey(p.name)||'sem-nome';
+    if(!map[k]){map[k]={name:nm,items:[],qty:0,min:0};out.push(map[k])}
+    var g=map[k];g.items.push(p);g.qty+=Number(p.qty)||0;g.min+=Number(p.min)||0;
+  });
+  return out.sort(function(a,b){return a.name.localeCompare(b.name,'pt-BR')});
+}
+function grpTag(g){return g.qty<=0?'<span class="tag t-bad">Zerado</span>':g.qty<=g.min?'<span class="tag t-warn">Baixo</span>':'<span class="tag t-ok">Em estoque</span>'}
+function toggleGroups(){
+  var el=document.getElementById('group-list');if(!el)return;
+  var willOpen=el.hidden;
+  grpOpen=willOpen;el.hidden=!willOpen;
+  var b=document.getElementById('grp-toggle');
+  if(b){b.textContent=willOpen?'Recolher':'Expandir';b.setAttribute('aria-expanded',willOpen?'true':'false')}
+}
+function vGrupos(){
+  var all=groupsOf(),nq=normKey(q);
+  var gs=nq?all.filter(function(g){return normKey(g.name).indexOf(nq)>-1||g.items.some(function(p){return normKey(p.sku).indexOf(nq)>-1})}):all;
+  var unidades=all.reduce(function(s,g){return s+g.qty},0);
+  var rows=gs.length?gs.map(function(g){
+    var chips=g.items.map(function(p){return '<li title="'+esc(p.sku)+'">'+esc((p.sizes||[]).join(', ')||p.sku||'—')+' <b>'+p.qty+'</b></li>'}).join('');
+    return '<li class="group"><div class="ghead"><strong>'+esc(g.name)+'</strong><span class="gsum"><b>'+g.qty+'</b><span>un.</span></span></div>'+
+    '<div class="gmeta">'+g.items.length+(g.items.length>1?' variações':' variação')+' · mínimo '+g.min+' '+grpTag(g)+'</div>'+
+    '<ul class="gsizes">'+chips+'</ul></li>';
+  }).join(''):'<div class="empty">'+(S.products.length?'Nenhum produto encontrado.':'Cadastre produtos para ver a soma por produto.')+'</div>';
+  var open=grpOpen||!!nq;
+  return '<div class="card"><div class="listhead"><div><h2 style="margin:0">Soma por produto</h2><small style="color:var(--muted)">'+all.length+' grupo(s) · '+unidades+' unidades no total</small></div>'+
+  '<button class="btn ghost sm" id="grp-toggle" onclick="toggleGroups()" aria-controls="group-list" aria-expanded="'+(open?'true':'false')+'">'+(open?'Recolher':'Expandir')+'</button></div>'+
+  '<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Produtos com o mesmo nome entram no mesmo grupo e são somados, mesmo cadastrados em tamanhos ou códigos diferentes.</p>'+
+  '<div id="group-list"'+(open?'':' hidden')+'><ul class="groups">'+rows+'</ul></div></div>';
 }
 
 /* ---------- calculadora (popup) ---------- */
@@ -1008,7 +1060,7 @@ function vEstoque(){
   '<button class="btn" onclick="addProduct()">Salvar produto</button></div></div>'+
   '<div class="card"><div class="listhead"><div><h2 style="margin:0">Produtos cadastrados</h2><small style="color:var(--muted)">'+S.products.length+' no cadastro'+(q?' · '+list.length+' encontrado(s)':'')+'</small></div><button class="btn ghost sm" id="list-toggle" onclick="toggleList()" aria-controls="stock-list" aria-expanded="'+((listOpen||q)?'true':'false')+'">'+((listOpen||q)?'Recolher':'Expandir')+'</button></div>'+
   '<div class="row" style="margin:12px 0 10px"><label style="flex:1 1 240px">Buscar<input id="q" value="'+esc(q)+'" oninput="q=this.value;render(true,\'q\')" placeholder="Código, nome, tamanho ou observação"></label></div>'+
-  '<div id="stock-list"'+((listOpen||q)?'':' hidden')+'>'+(list.length?'<div class="scroll"><table class="t-estoque"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mínimo</th><th>Situação</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">'+(S.products.length?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Preencha o formulário acima para começar.')+'</div>')+'</div></div>'+
+  '<div id="stock-list"'+((listOpen||q)?'':' hidden')+'>'+(list.length?'<div class="scroll"><table class="t-estoque"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mínimo</th><th>Situação</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">'+(S.products.length?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Preencha o formulário acima para começar.')+'</div>')+  '</div></div>'+vGrupos()+
   '<div class="card"><h2>Backup e restauração</h2><p style="color:var(--muted);font-size:13px">Baixe um arquivo JSON com todos os dados da empresa. A restauração substitui os dados atuais para todos os usuários. Também serve para importar os dados da versão antiga (que ficava só no aparelho).</p>'+
   '<button class="btn ghost" onclick="downloadBackup()">Baixar backup</button> <button class="btn ghost" onclick="document.getElementById(\'backup-file\').click()">Importar backup</button>'+
   '<input id="backup-file" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"></div>';
@@ -1031,14 +1083,14 @@ function refLabel(){
   document.getElementById('m-ref').placeholder=s?'Ex.: PED-0001':'';
 }
 function vPedidos(){
-  var dl=draft.map(function(i,k){var p=prod(i.pid);return '<li><span>'+(p?esc(p.name):'Produto removido')+' × '+i.qty+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
+  var dl=draft.map(function(i,k){var p=prod(i.pid);return '<li><span>'+(p?esc(p.name)+sizeOf(p):'Produto removido')+' × '+i.qty+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
   var form=S.products.length?'<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:2 1 220px">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label><label style="flex:1 1 180px">Cidade de destino<input id="o-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label>'+
   '<label style="flex:2 1 220px">Produto<select id="o-prod">'+opts()+'</select></label><label>Quantidade<input id="o-qty" type="number" min="1" value="1"></label>'+
   '<button class="btn ghost" onclick="addDraft()">Adicionar item</button></div>'+
   (draft.length?'<ul class="draft">'+dl+'</ul><button class="btn" onclick="saveOrder()">Criar pedido</button>':'')+'</div>':'<div class="card empty">Cadastre produtos para criar pedidos.</div>';
   var list=S.orders.map(function(o){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
-    var items=o.items.map(function(i){var p=prod(i.pid);return '<li>'+(p?esc(p.name):'Produto removido')+' × '+i.qty+'</li>'}).join('');
+    var items=o.items.map(function(i){var p=prod(i.pid);return '<li>'+(p?esc(p.name)+sizeOf(p):'Produto removido')+' × '+i.qty+'</li>'}).join('');
     return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+'</small>'+(o.city?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+'<ul>'+items+'</ul>'+
     (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button>':'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button>')+'</div>';
   }).join('');

@@ -90,7 +90,15 @@ etiquetas e relatórios continuam iguais).
   abaixo do nome do destinatário; o valor fica guardado no aparelho para a próxima etiqueta.
 - **Calculadora:** ícone no canto superior direito abre uma calculadora em popup (somar,
   subtrair, multiplicar e dividir) para conferir valores sem sair da tela.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.0).
+- **Soma por produto:** na aba Estoque, um cartão **Soma por produto** agrupa automaticamente
+  os produtos que têm o mesmo nome e mostra o total somado — por exemplo, babydoll em P, M e G
+  aparece como um grupo só, com a soma e a quantidade de cada tamanho. O grupo mostra ainda
+  quantas variações existem, o estoque mínimo somado e a situação (Em estoque, Baixo ou Zerado).
+  A busca do estoque também filtra os grupos.
+- **Pedidos com tamanho:** na aba Pedidos (e em Movimentar), a lista de produtos mostra o nome
+  completo com o tamanho e o saldo — por exemplo `IMP-0031 – Babydoll (P) · 14 un.`. Os itens
+  adicionados ao pedido e os pedidos já criados também aparecem com o tamanho ao lado do nome.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.2).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
