@@ -105,7 +105,11 @@ etiquetas e relatórios continuam iguais).
 - **Tamanhos / Variações:** no cadastro de **Novo produto** (aba Estoque), o campo agora se
   chama **Tamanhos / Variações** e aceita qualquer variação, não só letra de tamanho —
   por exemplo `P, M, G` ou `10ml, 20ml`.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.4).
+- **Tabelas recolhíveis no Relatório:** as seções **Soma por produto** e **Inventário completo**
+  agora começam recolhidas, com um botão **Expandir / Recolher** em cada uma — a página fica
+  curta e limpa, e o resumo com os números continua sempre visível. No **Gerar PDF** as duas
+  tabelas saem completas, recolhidas ou não na tela.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.5).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

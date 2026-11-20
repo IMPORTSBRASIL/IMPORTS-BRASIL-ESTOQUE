@@ -362,6 +362,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   main>.top,.navwrap,#msg,.report-no-print,.credits{display:none!important}
   #view{display:block!important}
   .report-page{display:block!important}
+  .rel-block[hidden]{display:block!important}
   .card{background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0 0 12px!important;break-inside:avoid}
   .report-summary{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
   .report-stat{border:1px solid #d5dce1!important;padding:8px;background:#fff!important}
@@ -398,7 +399,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.4</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.5</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -407,7 +408,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.4</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.5</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -735,6 +736,17 @@ async function saveEdit(){
   }catch(e){fail(e)}
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window._edId)closeEdit()});
+
+/* ---------- relatório: recolher / expandir as tabelas ---------- */
+var relOpen={soma:false,inv:false};
+function toggleRel(key){
+  var el=document.getElementById('rel-'+key);if(!el)return;
+  var willOpen=el.hidden;
+  relOpen[key]=willOpen;el.hidden=!willOpen;
+  var b=document.getElementById('rel-'+key+'-btn');
+  if(b){b.textContent=willOpen?'Recolher':'Expandir';b.setAttribute('aria-expanded',willOpen?'true':'false')}
+  if(!willOpen&&el.parentNode&&el.previousElementSibling&&el.previousElementSibling.scrollIntoView)el.previousElementSibling.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
 
 /* ---------- lista de produtos (recolher / expandir) ---------- */
 var listOpen=false;
@@ -1142,11 +1154,13 @@ function vRelatorios(){
     '<div class="report-stat"><span>Produtos com saldo</span><strong>'+withStock+'</strong></div>'+
     '<div class="report-stat"><span>Unidades em estoque</span><strong>'+total+'</strong></div>'+
     '<div class="report-stat"><span>Baixo / zerado</span><strong>'+low+' / '+zero+'</strong></div></div>'+
-    '<h2>Soma por produto</h2><p class="report-subtitle" style="margin:-4px 0 8px">'+groups.length+' produto(s) agrupado(s) · '+gtotal+' unidades somadas (todas as variações e tamanhos)'+(gmin?' · mínimo somado '+gmin:'')+'</p>'+
-    '<div class="scroll"><table class="t-resumo"><thead><tr><th>Produto</th><th>Variações (tamanho × qtd.)</th><th class="n">Total</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
-    (grows||'<tr><td colspan="5" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div>'+
-    '<h2 style="margin-top:18px">Inventário completo</h2><div class="scroll"><table class="t-rel"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
-    (rows||'<tr><td colspan="7" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div></div></div>';
+    '<div class="listhead" style="margin:20px 0 2px"><h2 style="margin:0">Soma por produto</h2><button class="btn ghost sm report-no-print" id="rel-soma-btn" onclick="toggleRel(\'soma\')" aria-controls="rel-soma" aria-expanded="'+(relOpen.soma?'true':'false')+'">'+(relOpen.soma?'Recolher':'Expandir')+'</button></div>'+
+    '<p class="report-subtitle" style="margin:0 0 8px">'+groups.length+' produto(s) agrupado(s) · '+gtotal+' unidades somadas (todas as variações e tamanhos)'+(gmin?' · mínimo somado '+gmin:'')+'</p>'+
+    '<div class="rel-block" id="rel-soma"'+(relOpen.soma?'':' hidden')+'><div class="scroll"><table class="t-resumo"><thead><tr><th>Produto</th><th>Variações (tamanho × qtd.)</th><th class="n">Total</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
+    (grows||'<tr><td colspan="5" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div></div>'+
+    '<div class="listhead" style="margin:22px 0 2px"><h2 style="margin:0">Inventário completo</h2><button class="btn ghost sm report-no-print" id="rel-inv-btn" onclick="toggleRel(\'inv\')" aria-controls="rel-inv" aria-expanded="'+(relOpen.inv?'true':'false')+'">'+(relOpen.inv?'Recolher':'Expandir')+'</button></div>'+
+    '<div class="rel-block" id="rel-inv"'+(relOpen.inv?'':' hidden')+'><div class="scroll"><table class="t-rel"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="7" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div></div></div></div>';
 }
 function render(keep,focus){
   var tabs=[['estoque','Estoque'],['mover','Movimentar'],['pedidos','Pedidos'],['hist','Histórico'],['etiquetas','Etiquetas'],['relatorios','Relatório']];
