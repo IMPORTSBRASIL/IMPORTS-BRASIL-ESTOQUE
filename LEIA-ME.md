@@ -83,6 +83,14 @@ etiquetas e relatórios continuam iguais).
   do iPhone (notch).
 - **Relatório/impressão** continuam em tabela normal no papel.
 - O site guarda a versão nova em cache assim que abre (`sw.js` atualizado).
+- **Lista de produtos recolhida:** na aba Estoque, a lista de produtos cadastrados começa
+  fechada (só o título e a contagem) e abre no botão **Expandir** — a tela fica bem mais curta
+  no celular. Ao usar a busca, a lista abre sozinha.
+- **Etiquetas:** novo campo **CPF / CNPJ (opcional)**. Se preenchido, sai impresso na etiqueta
+  abaixo do nome do destinatário; o valor fica guardado no aparelho para a próxima etiqueta.
+- **Calculadora:** ícone no canto superior direito abre uma calculadora em popup (somar,
+  subtrair, multiplicar e dividir) para conferir valores sem sair da tela.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.0).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

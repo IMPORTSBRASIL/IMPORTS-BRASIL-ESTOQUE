@@ -85,6 +85,46 @@ small{font-size:12.5px}
   background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;
   font-size:12.5px;color:var(--ink-soft);box-shadow:var(--shadow-sm);
 }
+.iconbtn{
+  width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;cursor:pointer;
+  border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--accent);
+  box-shadow:var(--shadow-sm);transition:background .16s,border-color .16s,transform .12s;
+}
+.iconbtn:hover{background:var(--brand-soft);border-color:var(--brand)}
+.iconbtn:active{transform:scale(.96)}
+.iconbtn svg{width:20px;height:20px;display:block}
+.credits{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;padding:4px 0 2px;margin:4px 0 0;text-align:center}
+.credits strong{color:var(--ink-soft);font-weight:650}
+.login .credits{margin-top:18px}
+.listhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.listhead h2{margin:0}
+
+/* ---------- calculadora ---------- */
+.calcpop{
+  position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));z-index:40;
+  width:min(300px,calc(100vw - 28px));padding:14px;display:none;background:var(--surface);
+  border:1px solid var(--line-strong);border-radius:var(--r-lg);box-shadow:0 18px 44px rgba(15,42,54,.22);
+}
+.calcpop.on{display:block}
+.calc-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.calc-head strong{font-size:14px}
+.calc-sub{min-height:16px;text-align:right;font-size:12px;color:var(--muted);margin-top:8px;font-variant-numeric:tabular-nums}
+.calc-out{
+  text-align:right;font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1.25;
+  padding:2px 2px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.calc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.calc-grid button{
+  font:inherit;font-size:16px;font-weight:600;min-height:46px;cursor:pointer;
+  border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);color:var(--ink);
+  transition:background .14s,transform .1s;
+}
+.calc-grid button:hover{background:var(--surface-2)}
+.calc-grid button:active{transform:scale(.96)}
+.calc-grid button.op{background:var(--brand-soft);color:var(--accent);border-color:color-mix(in srgb,var(--brand) 35%,var(--line))}
+.calc-grid button.eq{background:linear-gradient(140deg,var(--brand-2),var(--brand));color:#fff;border-color:transparent;grid-row:span 2;min-height:0}
+.calc-grid button.w2{grid-column:span 2}
+:root[data-theme="dark"] .calc-grid button.eq{color:#04161c}
 
 /* ---------- navegação ---------- */
 .navwrap{
@@ -293,7 +333,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   @page{size:A4 landscape;margin:14mm}
   body{background:#fff!important;background-image:none!important;color:#1c2830!important;font-size:11px;padding:0!important}
   main{max-width:none;padding:0}
-  main>.top,.navwrap,#msg,.report-no-print{display:none!important}
+  main>.top,.navwrap,#msg,.report-no-print,.credits{display:none!important}
   #view{display:block!important}
   .report-page{display:block!important}
   .card{background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0 0 12px!important;break-inside:avoid}
@@ -310,7 +350,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   td::before{display:none!important;content:none!important}
   th{background:#eef1f3!important;color:#42515b!important;font-size:10px}
   .tag{background:#f2f4f5!important;color:#26353d!important}
-  .modal{display:none!important}
+  .modal,.calcpop{display:none!important}
 }
 </style>
 </head>
@@ -327,15 +367,31 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <label>Senha<input id="l-pass" type="password" autocomplete="current-password" placeholder="Sua senha"></label>
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
-<button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form></div>
+<button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.0</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
   <div class="brand"><span class="brandmark" aria-hidden="true">IB</span><div><h1>Imports Brasil</h1><small>Controle de estoque</small></div></div>
-  <div class="who"><span class="chip" id="who"></span><button class="btn ghost sm" onclick="logout()">Sair</button></div>
+  <div class="who"><span class="chip" id="who"></span><button class="btn ghost sm" onclick="logout()">Sair</button><button class="iconbtn" id="calc-btn" onclick="toggleCalc()" aria-haspopup="dialog" aria-expanded="false" aria-label="Abrir calculadora" title="Calculadora"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 6.5h8"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></button></div>
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.0</strong></span></footer>
+<div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
+<div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
+<div class="calc-sub" id="calc-sub">&nbsp;</div>
+<div class="calc-out" id="calc-out">0</div>
+<div class="calc-grid">
+<button onclick="calcClear()" aria-label="Limpar">C</button>
+<button onclick="calcBack()" aria-label="Apagar último dígito">⌫</button>
+<button class="op" onclick="calcOp('÷')" aria-label="Dividir">÷</button>
+<button class="op" onclick="calcOp('×')" aria-label="Multiplicar">×</button>
+<button onclick="calcNum('7')">7</button><button onclick="calcNum('8')">8</button><button onclick="calcNum('9')">9</button><button class="op" onclick="calcOp('−')" aria-label="Subtrair">−</button>
+<button onclick="calcNum('4')">4</button><button onclick="calcNum('5')">5</button><button onclick="calcNum('6')">6</button><button class="op" onclick="calcOp('+')" aria-label="Somar">+</button>
+<button onclick="calcNum('1')">1</button><button onclick="calcNum('2')">2</button><button onclick="calcNum('3')">3</button><button class="eq" onclick="calcEq()" aria-label="Igual">=</button>
+<button class="w2" onclick="calcNum('0')">0</button><button onclick="calcDot()" aria-label="Vírgula decimal">,</button>
+</div></div>
 </div>
 </main>
 <div id="modal" class="modal" style="display:none" onclick="if(event.target===this)closeEdit()"><div class="card box" role="dialog" aria-modal="true" aria-label="Editar produto">
@@ -649,6 +705,82 @@ async function saveEdit(){
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window._edId)closeEdit()});
 
+/* ---------- lista de produtos (recolher / expandir) ---------- */
+var listOpen=false;
+function toggleList(){
+  var el=document.getElementById('stock-list');if(!el)return;
+  var willOpen=el.hidden;
+  listOpen=willOpen;el.hidden=!willOpen;
+  var b=document.getElementById('list-toggle');
+  if(b){b.textContent=willOpen?'Recolher':'Expandir';b.setAttribute('aria-expanded',willOpen?'true':'false')}
+  var head=el.parentNode;
+  if(!willOpen&&head&&head.scrollIntoView)head.scrollIntoView({block:'start',behavior:'smooth'});
+}
+
+/* ---------- calculadora (popup) ---------- */
+var CALC={cur:'0',prev:null,op:null,fresh:true};
+function fmtNum(n){var s=String(Math.round(n*1e10)/1e10);return s.replace('.',',')}
+function calcRender(){
+  var o=document.getElementById('calc-out');if(!o)return;
+  o.textContent=CALC.cur;
+  var s=document.getElementById('calc-sub');
+  if(s)s.textContent=CALC.op!=null?(fmtNum(CALC.prev)+' '+CALC.op):'\u00a0';
+}
+function calcNum(d){
+  if(CALC.fresh||CALC.cur==='0'){CALC.cur=d;CALC.fresh=false}
+  else if(CALC.cur.replace(/[^0-9]/g,'').length<12)CALC.cur+=d;
+  calcRender();
+}
+function calcDot(){
+  if(CALC.fresh){CALC.cur='0,';CALC.fresh=false}
+  else if(CALC.cur.indexOf(',')<0)CALC.cur+=',';
+  calcRender();
+}
+function calcBack(){
+  if(CALC.fresh)return;
+  CALC.cur=CALC.cur.length>1?CALC.cur.slice(0,-1):'0';
+  calcRender();
+}
+function calcClear(){
+  CALC={cur:'0',prev:null,op:null,fresh:true};calcRender();
+}
+function calcDo(a,b,op){
+  if(op==='+')return a+b;
+  if(op==='−')return a-b;
+  if(op==='×')return a*b;
+  if(op==='÷')return b===0?0:a/b;
+  return b;
+}
+function calcVal(){return parseFloat(CALC.cur.replace(',','.'))||0}
+function calcOp(op){
+  var v=calcVal();
+  if(CALC.op!=null&&!CALC.fresh)v=calcDo(CALC.prev,v,CALC.op);
+  CALC.prev=v;CALC.op=op;CALC.cur=fmtNum(v);CALC.fresh=true;calcRender();
+}
+function calcEq(){
+  if(CALC.op==null)return;
+  var v=calcDo(CALC.prev,calcVal(),CALC.op);
+  CALC.cur=fmtNum(v);CALC.prev=null;CALC.op=null;CALC.fresh=true;calcRender();
+}
+function toggleCalc(force){
+  var el=document.getElementById('calc');if(!el)return;
+  var on=typeof force==='boolean'?force:!el.classList.contains('on');
+  el.classList.toggle('on',on);
+  var b=document.getElementById('calc-btn');
+  if(b)b.setAttribute('aria-expanded',on?'true':'false');
+  if(on)calcRender();
+}
+document.addEventListener('click',function(e){
+  var el=document.getElementById('calc');
+  if(!el||!el.classList.contains('on'))return;
+  if(el.contains(e.target)||e.target.closest('#calc-btn'))return;
+  toggleCalc(false);
+});
+document.addEventListener('keydown',function(e){
+  var el=document.getElementById('calc');
+  if(e.key==='Escape'&&el&&el.classList.contains('on'))toggleCalc(false);
+});
+
 /* ---------- Etiquetas de envio (PDF gerado no próprio navegador) ---------- */
 var HW={"r":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,556,556,333,556,537,278,333,556,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"b":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,556,556,333,611,556,278,333,556,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
 var C128=["212222", "222122", "222221", "121223", "121322", "131222", "122213", "122312", "132212", "221213", "221312", "231212", "112232", "122132", "122231", "113222", "123122", "123221", "223211", "221132", "221231", "213212", "223112", "312131", "311222", "321122", "321221", "312212", "322112", "322211", "212123", "212321", "232121", "111323", "131123", "131321", "112313", "132113", "132311", "211313", "231113", "231311", "112133", "112331", "132131", "113123", "113321", "133121", "313121", "211331", "231131", "213113", "213311", "213131", "311123", "311321", "331121", "312113", "312311", "332111", "314111", "221411", "431111", "111224", "111422", "121124", "121421", "141122", "141221", "112214", "112412", "122114", "122411", "142112", "142211", "241211", "221114", "413111", "241112", "134111", "111242", "121142", "121241", "114212", "124112", "124211", "411212", "421112", "421211", "212141", "214121", "412121", "111143", "111341", "131141", "114113", "114311", "411113", "411311", "113141", "114131", "311141", "411131", "211412", "211214", "211232", "2331112"];
@@ -744,6 +876,11 @@ function drawLabel(pg,d,w,h,vi,vn){
   var nf=pl.nf;
   nf.lines.forEach(function(l){pg.text(l,M,y+nf.size*0.85,nf.size,true,'l',cw);y+=nf.size*1.12});
   y+=g*0.4;
+  /* CPF / CNPJ (opcional) */
+  if(d.doc){
+    var ds=Math.max(6,(big?11:9)*scf);
+    if(infoTop-y-g*0.8>ds*1.3){pg.text('CPF/CNPJ: '+d.doc,M,y+ds*0.85,ds,false,'l',cw);y+=ds*1.3}
+  }
   /* endereço / observações */
   if(d.addr&&d.addr.trim()){
     var as=(big?10.5:9)*scf,room=Math.floor((infoTop-y-g)/(as*1.15));
@@ -807,9 +944,10 @@ function fillLabel(){
 function labelFor(id){window._pre=id;go('etiquetas')}
 function initLabelTab(){
   try{
-    var sz=localStorage.getItem('lbl-size'),fr=localStorage.getItem('lbl-from'),cw=localStorage.getItem('lbl-w'),ch=localStorage.getItem('lbl-h');
+    var sz=localStorage.getItem('lbl-size'),fr=localStorage.getItem('lbl-from'),cw=localStorage.getItem('lbl-w'),ch=localStorage.getItem('lbl-h'),dc=localStorage.getItem('lbl-doc');
     if(sz&&LBL_SIZES.some(function(x){return x[0]===sz}))document.getElementById('e-size').value=sz;
     if(fr!==null)document.getElementById('e-from').value=fr;
+    if(dc!==null)document.getElementById('e-doc').value=dc;
     if(cw)document.getElementById('e-w').value=cw;if(ch)document.getElementById('e-h').value=ch;
   }catch(e){}
   if(window._pre){document.getElementById('e-order').value=window._pre;fillLabel();window._pre=null}
@@ -822,8 +960,9 @@ function labelBlob(){
   if(!vols||vols<1||vols>99)return toast('Volumes: informe de 1 a 99.'),null;
   var sz=labelSize();
   if(!(sz[0]>=30&&sz[0]<=210&&sz[1]>=25&&sz[1]<=300))return toast('Tamanho inválido (largura 30–210 mm, altura 25–300 mm).'),null;
-  try{localStorage.setItem('lbl-size',val('e-size'));localStorage.setItem('lbl-from',val('e-from'));localStorage.setItem('lbl-w',val('e-w'));localStorage.setItem('lbl-h',val('e-h'))}catch(e){}
-  var d={sender:val('e-from')||'Imports Brasil',client:client,city:city,addr:document.getElementById('e-addr').value,num:val('e-num'),date:new Date().toLocaleDateString('pt-BR')};
+  var doc=String(val('e-doc')||'').trim().replace(/\s+/g,' ').slice(0,20);
+  try{localStorage.setItem('lbl-size',val('e-size'));localStorage.setItem('lbl-from',val('e-from'));localStorage.setItem('lbl-w',val('e-w'));localStorage.setItem('lbl-h',val('e-h'));localStorage.setItem('lbl-doc',doc)}catch(e){}
+  var d={sender:val('e-from')||'Imports Brasil',client:client,city:city,addr:document.getElementById('e-addr').value,num:val('e-num'),doc:doc,date:new Date().toLocaleDateString('pt-BR')};
   d.sender=d.sender.toUpperCase();
   return {blob:makeLabelsPdf(d,sz[0],sz[1],vols),name:'etiquetas-'+(d.num||'envio')+'.pdf'};
 }
@@ -846,6 +985,7 @@ function vEtiquetas(){
   '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Escolha um pedido para preencher automaticamente, ou digite uma etiqueta avulsa. Gera um PDF com uma etiqueta por volume, em preto e branco, no tamanho da sua bobina.</p><div class="row">'+
   '<label style="flex:1 1 100%">Pedido<select id="e-order" onchange="fillLabel()"><option value="">Etiqueta avulsa (digitar)</option>'+os+'</select></label>'+
   '<label style="flex:2 1 220px">Destinatário<input id="e-client"></label>'+
+  '<label style="flex:1 1 170px">CPF / CNPJ (opcional)<input id="e-doc" maxlength="20" placeholder="Só os números"></label>'+
   '<label style="flex:2 1 200px">Cidade / UF de destino<input id="e-city" list="cities" placeholder="Ex.: Joinville / SC"></label>'+
   '<label style="flex:1 1 100%">Endereço / observações (opcional)<textarea id="e-addr" placeholder="Rua, número, bairro, CEP, telefone…"></textarea></label>'+
   '<label>Nº do pedido (vira código de barras)<input id="e-num" placeholder="Ex.: PED-0001"></label>'+
@@ -866,8 +1006,9 @@ function vEstoque(){
   '<label style="flex:2 1 220px">Observações<textarea id="p-notes" placeholder="Detalhes adicionais do produto"></textarea></label>'+
   '<label>Qtd. inicial<input id="p-qty" type="number" min="0" value="0"></label><label>Estoque mínimo<input id="p-min" type="number" min="0" value="0"></label>'+
   '<button class="btn" onclick="addProduct()">Salvar produto</button></div></div>'+
-  '<div class="card"><div class="row" style="margin-bottom:8px"><label style="flex:1 1 240px">Buscar<input id="q" value="'+esc(q)+'" oninput="q=this.value;render(true,\'q\')" placeholder="Código, nome, tamanho ou observação"></label></div>'+
-  (list.length?'<div class="scroll"><table class="t-estoque"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mínimo</th><th>Situação</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">'+(S.products.length?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Preencha o formulário acima para começar.')+'</div>')+'</div>'+
+  '<div class="card"><div class="listhead"><div><h2 style="margin:0">Produtos cadastrados</h2><small style="color:var(--muted)">'+S.products.length+' no cadastro'+(q?' · '+list.length+' encontrado(s)':'')+'</small></div><button class="btn ghost sm" id="list-toggle" onclick="toggleList()" aria-controls="stock-list" aria-expanded="'+((listOpen||q)?'true':'false')+'">'+((listOpen||q)?'Recolher':'Expandir')+'</button></div>'+
+  '<div class="row" style="margin:12px 0 10px"><label style="flex:1 1 240px">Buscar<input id="q" value="'+esc(q)+'" oninput="q=this.value;render(true,\'q\')" placeholder="Código, nome, tamanho ou observação"></label></div>'+
+  '<div id="stock-list"'+((listOpen||q)?'':' hidden')+'>'+(list.length?'<div class="scroll"><table class="t-estoque"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mínimo</th><th>Situação</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">'+(S.products.length?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Preencha o formulário acima para começar.')+'</div>')+'</div></div>'+
   '<div class="card"><h2>Backup e restauração</h2><p style="color:var(--muted);font-size:13px">Baixe um arquivo JSON com todos os dados da empresa. A restauração substitui os dados atuais para todos os usuários. Também serve para importar os dados da versão antiga (que ficava só no aparelho).</p>'+
   '<button class="btn ghost" onclick="downloadBackup()">Baixar backup</button> <button class="btn ghost" onclick="document.getElementById(\'backup-file\').click()">Importar backup</button>'+
   '<input id="backup-file" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"></div>';
