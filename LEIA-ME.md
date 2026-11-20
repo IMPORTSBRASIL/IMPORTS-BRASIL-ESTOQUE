@@ -64,3 +64,19 @@ Faça **Baixar backup** com frequência (ex.: toda semana) e guarde o arquivo.
 ## Limites do plano gratuito (Firebase Spark)
 50 mil leituras e 20 mil gravações por dia, 1 GB. Para uma equipe pequena/média é mais que suficiente.
 Todos os usuários logados têm as mesmas permissões (inclusive apagar e restaurar backup).
+
+---
+
+## Novidades desta atualização
+- **Editar produto:** botão "Editar" em cada linha do Estoque (nome, tamanhos, observações, estoque mínimo e quantidade).
+  Se a quantidade for alterada, a diferença entra no Histórico como "Ajuste de estoque".
+- **Produtos em ordem alfabética** (A–Z, ignorando acentos) em todas as telas.
+- **Pedidos:** novo campo obrigatório "Cidade de destino" (com sugestões das cidades já usadas). Pedidos antigos continuam funcionando, sem cidade.
+- **Nova aba Etiquetas:** gera PDF com uma etiqueta por volume (cidade em destaque, destinatário, endereço, pedido, data e código de barras Code 128 com o nº do pedido).
+  Tamanhos: 100×150 mm (padrão de envio), 100×100, 100×70, 60×40 ou personalizado. Em cada pedido há também o botão "Etiqueta de envio".
+  Na impressão: escolha a impressora térmica, o papel com o mesmo tamanho da etiqueta e escala 100%.
+
+## Como atualizar o site no GitHub
+Envie para o repositório (Add file > Upload files, substituindo os existentes) **somente**: `index.html`, `sw.js` e `LEIA-ME.md`.
+**Não substitua o seu `firebase-config.js`**: ele já tem os dados do seu projeto e este pacote não o inclui.
+Depois de ~1 minuto, abra o site e atualize a página (se ainda aparecer a versão antiga, feche e abra de novo).

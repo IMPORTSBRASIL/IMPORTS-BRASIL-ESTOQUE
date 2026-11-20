@@ -82,6 +82,10 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .err{color:var(--bad);font-size:13px;min-height:18px;margin:8px 0 0}
 .link{background:none;border:0;color:var(--accent);font:inherit;font-size:13px;cursor:pointer;padding:8px 0 0;text-decoration:underline}
 #setup code{background:var(--bg);padding:1px 5px;border-radius:4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:4;overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 12px calc(16px + env(safe-area-inset-bottom,0px))}
+.modal .box{max-width:560px;margin:0 auto}
+.btn.ghost.sm{white-space:nowrap}
+@media print{.modal{display:none!important}}
 </style>
 </head>
 <body>
@@ -103,6 +107,18 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <div id="view"><div class="empty">Carregando…</div></div>
 </div>
 </main>
+<div id="modal" class="modal" style="display:none" onclick="if(event.target===this)closeEdit()"><div class="card box" role="dialog" aria-modal="true" aria-label="Editar produto">
+<h2>Editar produto <span id="ed-sku" style="color:var(--muted);font-weight:400"></span></h2>
+<div class="row">
+<label style="flex:1 1 100%">Nome<input id="ed-name"></label>
+<label>Tamanhos<input id="ed-sizes" placeholder="Ex.: P, M, G, GG"></label>
+<label style="flex:1 1 100%">Observações<textarea id="ed-notes"></textarea></label>
+<label>Quantidade em estoque<input id="ed-qty" type="number" min="0"></label>
+<label>Estoque mínimo<input id="ed-min" type="number" min="0"></label>
+</div>
+<p style="color:var(--muted);font-size:13px;margin:10px 0">Se alterar a quantidade, a diferença é lançada no Histórico como "Ajuste de estoque".</p>
+<div class="row"><button class="btn" onclick="saveEdit()">Salvar alterações</button><button class="btn ghost" onclick="closeEdit()">Cancelar</button></div>
+</div></div>
 <div id="msg" role="status"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -145,7 +161,7 @@ function validInventoryData(data){
         (p.notes===undefined||typeof p.notes==='string');
     })&&
     Array.isArray(data.orders)&&data.orders.every(function(o){
-      return o&&typeof o==='object'&&safeId(o.id)&&safeId(o.num)&&typeof o.client==='string'&&
+      return o&&typeof o==='object'&&safeId(o.id)&&safeId(o.num)&&typeof o.client==='string'&&(o.city===undefined||typeof o.city==='string')&&
         typeof o.date==='number'&&Number.isFinite(o.date)&&
         (o.status==='Pendente'||o.status==='Atendido'||o.status==='Cancelado')&&
         Array.isArray(o.items)&&o.items.every(function(i){
@@ -289,8 +305,9 @@ function addDraft(){
 }
 function rmDraft(i){draft.splice(i,1);render(true)}
 async function saveOrder(){
-  var client=val('o-client');
+  var client=val('o-client'),city=val('o-city');
   if(!client)return toast('Informe o cliente.');
+  if(!city)return toast('Informe a cidade de destino do pedido.');
   if(!draft.length)return toast('Adicione ao menos um item.');
   var num;
   try{
@@ -299,9 +316,9 @@ async function saveOrder(){
       var n=(c.exists&&c.data().seq)||S.seq||1;
       num='PED-'+pad(n);
       t.set(cref,{seq:n+1},{merge:true});
-      t.set(db.collection('orders').doc(uid()),{num:num,client:client,date:Date.now(),status:'Pendente',items:clean(draft),by:user.email});
+      t.set(db.collection('orders').doc(uid()),{num:num,client:client,city:city,date:Date.now(),status:'Pendente',items:clean(draft),by:user.email});
     });
-    draft=[];window._cl='';toast('Pedido '+num+' criado.');render();
+    draft=[];window._cl='';window._city='';toast('Pedido '+num+' criado.');render();
   }catch(e){fail(e)}
 }
 async function fulfill(id){
@@ -347,10 +364,258 @@ async function delMovement(id){
   try{await db.collection('moves').doc(id).delete();toast('Registro removido do histórico.')}catch(e){fail(e)}
 }
 
+
+/* ---------- Editar produto ---------- */
+function openEdit(id){
+  var p=prod(id);if(!p)return;
+  window._edId=id;window._edQty=p.qty;
+  document.getElementById('ed-sku').textContent=p.sku;
+  document.getElementById('ed-name').value=p.name;
+  document.getElementById('ed-sizes').value=(p.sizes||[]).join(', ');
+  document.getElementById('ed-notes').value=p.notes||'';
+  document.getElementById('ed-qty').value=p.qty;
+  document.getElementById('ed-min').value=p.min;
+  document.getElementById('modal').style.display='block';
+  document.getElementById('ed-name').focus();
+}
+function closeEdit(){document.getElementById('modal').style.display='none';window._edId=null}
+async function saveEdit(){
+  var id=window._edId;if(!id)return;
+  var name=val('ed-name'),sizes=val('ed-sizes').split(/[,\n;]+/).map(function(s){return s.trim().toUpperCase()}).filter(Boolean),
+    notes=val('ed-notes'),min=parseInt(val('ed-min')),qtyIn=parseInt(val('ed-qty'));
+  if(!name)return toast('Informe o nome do produto.');
+  if(isNaN(min)||min<0)return toast('Estoque mínimo inválido.');
+  if(isNaN(qtyIn)||qtyIn<0)return toast('Quantidade inválida.');
+  var changeQty=qtyIn!==window._edQty;
+  try{
+    await db.runTransaction(async function(t){
+      var ref=db.collection('products').doc(id),d=await t.get(ref);
+      if(!d.exists)throw new Error('Este produto foi excluído por outro usuário.');
+      var p=d.data(),upd={name:name,sizes:Array.from(new Set(sizes)),notes:notes,min:min};
+      if(changeQty){
+        var diff=qtyIn-p.qty;
+        upd.qty=qtyIn;
+        if(diff!==0)t.set(db.collection('moves').doc(uid()),newMove(id,Object.assign({},p,{name:name}),diff>0?'Entrada':'Saída',Math.abs(diff),'Ajuste de estoque'));
+      }
+      t.update(ref,upd);
+    });
+    closeEdit();toast('Produto atualizado.');
+  }catch(e){fail(e)}
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window._edId)closeEdit()});
+
+/* ---------- Etiquetas de envio (PDF gerado no próprio navegador) ---------- */
+var HW={"r":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,556,556,333,556,537,278,333,556,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"b":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,556,556,333,611,556,278,333,556,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+var C128=["212222", "222122", "222221", "121223", "121322", "131222", "122213", "122312", "132212", "221213", "221312", "231212", "112232", "122132", "122231", "113222", "123122", "123221", "223211", "221132", "221231", "213212", "223112", "312131", "311222", "321122", "321221", "312212", "322112", "322211", "212123", "212321", "232121", "111323", "131123", "131321", "112313", "132113", "132311", "211313", "231113", "231311", "112133", "112331", "132131", "113123", "113321", "133121", "313121", "211331", "231131", "213113", "213311", "213131", "311123", "311321", "331121", "312113", "312311", "332111", "314111", "221411", "431111", "111224", "111422", "121124", "121421", "141122", "141221", "112214", "112412", "122114", "122411", "142112", "142211", "241211", "221114", "413111", "241112", "134111", "111242", "121142", "121241", "114212", "124112", "124211", "411212", "421112", "421211", "212141", "214121", "412121", "111143", "111341", "131141", "114113", "114311", "411113", "411311", "113141", "114131", "311141", "411131", "211412", "211214", "211232", "2331112"];
+var MM=72/25.4;
+var LBL_SIZES=[['100x150','100 × 150 mm (padrão de envio)',100,150],['100x100','100 × 100 mm',100,100],['100x70','100 × 70 mm',100,70],['60x40','60 × 40 mm',60,40],['custom','Personalizado…',0,0]];
+function f2(n){return n.toFixed(2)}
+function tw(s,size,bold){var a=bold?HW.b:HW.r,w=0;for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);w+=(c>=32&&c<=255)?a[c-32]:556}return w*size/1000}
+function pdfSafe(s){
+  var map={'–':'-','—':'-','’':"'",'‘':"'",'“':'"','”':'"','…':'...'},o='';
+  s=String(s);
+  for(var i=0;i<s.length;i++){
+    var ch=s.charAt(i),c=s.charCodeAt(i);
+    if(map[ch])o+=map[ch];else if(c>=32&&c<=126||c>=160&&c<=255)o+=ch;else o+=' ';
+  }
+  return o;
+}
+function pdfEsc(s){return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')}
+function Page(W,H){this.W=W;this.H=H;this.c=[]}
+Page.prototype.gray=function(v){this.c.push(f2(v)+' g')};
+Page.prototype.rect=function(x,y,w,h){this.c.push(f2(x)+' '+f2(this.H-y-h)+' '+f2(w)+' '+f2(h)+' re f')};
+Page.prototype.hline=function(x1,x2,y,lw){this.c.push(f2(lw)+' w '+f2(x1)+' '+f2(this.H-y)+' m '+f2(x2)+' '+f2(this.H-y)+' l S')};
+Page.prototype.text=function(s,x,y,size,bold,align,maxW){
+  s=pdfSafe(s);var w=tw(s,size,bold);
+  if(maxW&&w>maxW){size=size*maxW/w;w=maxW}
+  if(align==='c')x-=w/2;else if(align==='r')x-=w;
+  this.c.push('BT /'+(bold?'F2':'F1')+' '+f2(size)+' Tf '+f2(x)+' '+f2(this.H-y)+' Td ('+pdfEsc(s)+') Tj ET');
+  return size;
+};
+function wrapText(s,size,bold,maxW){
+  var words=pdfSafe(s).replace(/\s+/g,' ').trim().split(' '),lines=[],cur='';
+  words.forEach(function(w){
+    var t=cur?cur+' '+w:w;
+    if(!cur||tw(t,size,bold)<=maxW)cur=t;else{lines.push(cur);cur=w}
+  });
+  if(cur)lines.push(cur);
+  return lines;
+}
+function fitLines(s,start,min,bold,maxW,maxLines){
+  for(var size=start;size>=min;size-=0.5){
+    var lines=wrapText(s,size,bold,maxW);
+    if(lines.length<=maxLines&&lines.every(function(l){return tw(l,size,bold)<=maxW}))return {lines:lines,size:size};
+  }
+  var L=wrapText(s,min,bold,maxW).slice(0,maxLines);
+  var last=L.length-1;
+  while(last>=0&&L[last].length>1&&tw(L[last]+'...',min,bold)>maxW)L[last]=L[last].slice(0,-1);
+  if(last>=0&&wrapText(s,min,bold,maxW).length>maxLines)L[last]=L[last].replace(/\s+$/,'')+'...';
+  return {lines:L,size:min};
+}
+function code128(text){
+  var codes=[104],sum=104,t=pdfSafe(text);
+  for(var i=0;i<t.length;i++){var v=t.charCodeAt(i)-32;if(v<0||v>95)v=0;codes.push(v);sum+=v*(i+1)}
+  codes.push(sum%103);codes.push(106);
+  var w=[];codes.forEach(function(c){C128[c].split('').forEach(function(d){w.push(+d)})});
+  return w;
+}
+function drawLabel(pg,d,w,h,vi,vn){
+  var W=w*MM,H=h*MM,sc=Math.min(w/100,1.15),scf=Math.min(1,sc),big=h>=120,mid=h>=95,compact=h<65;
+  var M=Math.max(2.5,Math.min(5,w*0.04))*MM,cw=W-2*M,g=Math.max(1.2,2.2*sc)*MM,lbl=Math.max(5,6.5*scf);
+  var hh=Math.max(5.5,9*sc)*MM,fs=hh*0.5;
+  pg.gray(0);pg.rect(0,0,W,hh);pg.gray(1);
+  pg.text(d.sender||'',M,hh*0.68,fs,true,'l',cw*0.6);
+  pg.text('VOLUME '+vi+'/'+vn,W-M,hh*0.68,fs,true,'r',cw*0.37);
+  pg.gray(0);
+  var y=hh+g;
+  /* rodapé: código de barras */
+  var yBottom=H-M,barsTop=yBottom,hasBar=!!d.num;
+  if(hasBar){
+    var bw=code128(d.num),total=bw.reduce(function(a,b){return a+b},0);
+    var mod=cw/(total+20);
+    if(mod>=0.25*MM)mod=Math.min(0.5*MM,Math.floor(mod/(0.125*MM))*0.125*MM);
+    var bars=(big?22:mid?16:compact?10:9)*MM,ts=compact?0:Math.max(6,8*scf);
+    var bx=(W-total*mod)/2,by=yBottom-ts*1.15-bars;
+    if(!compact)pg.text(d.num,W/2,yBottom,ts,true,'c',cw);
+    var x=bx;bw.forEach(function(wd,i){if(i%2===0)pg.rect(x,by,wd*mod,bars);x+=wd*mod});
+    barsTop=by-g*0.6;
+  }
+  var infoH=compact?(10*scf+g*1.4):(lbl+15*scf)*1.0+g*0.8,infoTop=barsTop-infoH;
+  /* destino */
+  var cs=(big?40:mid?30:24)*Math.min(1,sc+0.15),ns=(big?17:mid?15:12)*scf;
+  function plan(k){
+    var cf=fitLines(d.city,cs*k,cs*k*0.4,true,cw,big?2:1),nf=fitLines(d.client,ns*k,Math.max(6,ns*k*0.5),true,cw,big?2:1);
+    var hg=(compact?0:lbl*2.2)+cf.lines.length*cf.size*1.1+nf.lines.length*nf.size*1.12+g*1.9;
+    return {cf:cf,nf:nf,hg:hg};
+  }
+  var pl=plan(1),room0=infoTop-g*0.5-y;
+  for(var k=0.95;pl.hg>room0&&k>=0.35;k-=0.05)pl=plan(k);
+  if(!compact){pg.text('DESTINO',M,y+lbl*0.8,lbl,false,'l');y+=lbl*1.1}
+  var cf=pl.cf;
+  cf.lines.forEach(function(l){pg.text(l,M,y+cf.size*0.85,cf.size,true,'l',cw);y+=cf.size*1.1});
+  y+=g*0.5;pg.hline(M,W-M,y,1.2*scf+0.4);y+=g;
+  /* destinatário */
+  if(!compact){pg.text('DESTINATÁRIO',M,y+lbl*0.8,lbl,false,'l');y+=lbl*1.1}
+  var nf=pl.nf;
+  nf.lines.forEach(function(l){pg.text(l,M,y+nf.size*0.85,nf.size,true,'l',cw);y+=nf.size*1.12});
+  y+=g*0.4;
+  /* endereço / observações */
+  if(d.addr&&d.addr.trim()){
+    var as=(big?10.5:9)*scf,room=Math.floor((infoTop-y-g)/(as*1.15));
+    if(room>=1){
+      var af=fitLines(d.addr,as,Math.max(6,as*0.65),false,cw,Math.min(room,big?5:3));
+      af.lines.forEach(function(l){pg.text(l,M,y+af.size*0.85,af.size,false,'l',cw);y+=af.size*1.15});
+    }
+  }
+  /* pedido / data */
+  pg.hline(M,W-M,infoTop,1.2*scf+0.4);
+  var iy=infoTop+g*0.5;
+  if(compact){
+    var isz=9.5*scf+1;
+    if(d.num)pg.text(d.num,M,iy+isz,isz,true,'l',cw*0.55);
+    pg.text(d.date,W-M,iy+isz,isz,true,'r',cw*0.4);
+  }else{
+    if(d.num){pg.text('PEDIDO',M,iy+lbl*0.8,lbl,false,'l');pg.text(d.num,M,iy+lbl*0.8+15*scf,15*scf,true,'l',cw*0.55)}
+    pg.text('DATA',W-M,iy+lbl*0.8,lbl,false,'r');pg.text(d.date,W-M,iy+lbl*0.8+15*scf,13*scf,true,'r',cw*0.4);
+  }
+}
+function buildPdf(pages,W,H){
+  var objs=[],n=pages.length,kids=[],i;
+  for(i=0;i<n;i++)kids.push((5+i*2)+' 0 R');
+  objs.push('<< /Type /Catalog /Pages 2 0 R >>');
+  objs.push('<< /Type /Pages /Count '+n+' /Kids ['+kids.join(' ')+'] >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  pages.forEach(function(pg,k){
+    var cs='0 g\n'+pg.c.join('\n');
+    objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+f2(W)+' '+f2(H)+'] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+(6+k*2)+' 0 R >>');
+    objs.push('<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream');
+  });
+  var out='%PDF-1.4\n',off=[];
+  objs.forEach(function(o,k){off.push(out.length);out+=(k+1)+' 0 obj\n'+o+'\nendobj\n'});
+  var xr=out.length;
+  out+='xref\n0 '+(objs.length+1)+'\n0000000000 65535 f \n';
+  off.forEach(function(o){out+=String(o).padStart(10,'0')+' 00000 n \n'});
+  out+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF';
+  var bytes=new Uint8Array(out.length);
+  for(i=0;i<out.length;i++)bytes[i]=out.charCodeAt(i)&255;
+  return new Blob([bytes],{type:'application/pdf'});
+}
+function makeLabelsPdf(d,w,h,vols){
+  var pages=[],W=w*MM,H=h*MM;
+  for(var v=1;v<=vols;v++){var pg=new Page(W,H);drawLabel(pg,d,w,h,v,vols);pages.push(pg)}
+  return buildPdf(pages,W,H);
+}
+function labelSize(){
+  var id=val('e-size'),s=LBL_SIZES.filter(function(x){return x[0]===id})[0]||LBL_SIZES[0];
+  if(s[0]==='custom')return [parseFloat(val('e-w')),parseFloat(val('e-h'))];
+  return [s[2],s[3]];
+}
+function sizeChange(){var c=document.getElementById('e-custom');if(c)c.style.display=val('e-size')==='custom'?'flex':'none'}
+function fillLabel(){
+  var id=val('e-order'),o=S.orders.find(function(x){return x.id===id});
+  if(!o)return;
+  document.getElementById('e-client').value=o.client;
+  document.getElementById('e-city').value=o.city||'';
+  document.getElementById('e-num').value=o.num;
+}
+function labelFor(id){window._pre=id;go('etiquetas')}
+function initLabelTab(){
+  try{
+    var sz=localStorage.getItem('lbl-size'),fr=localStorage.getItem('lbl-from'),cw=localStorage.getItem('lbl-w'),ch=localStorage.getItem('lbl-h');
+    if(sz&&LBL_SIZES.some(function(x){return x[0]===sz}))document.getElementById('e-size').value=sz;
+    if(fr!==null)document.getElementById('e-from').value=fr;
+    if(cw)document.getElementById('e-w').value=cw;if(ch)document.getElementById('e-h').value=ch;
+  }catch(e){}
+  if(window._pre){document.getElementById('e-order').value=window._pre;fillLabel();window._pre=null}
+  sizeChange();
+}
+function labelBlob(){
+  var client=val('e-client'),city=val('e-city'),vols=parseInt(val('e-vols'));
+  if(!client)return toast('Informe o destinatário.'),null;
+  if(!city)return toast('Informe a cidade de destino.'),null;
+  if(!vols||vols<1||vols>99)return toast('Volumes: informe de 1 a 99.'),null;
+  var sz=labelSize();
+  if(!(sz[0]>=30&&sz[0]<=210&&sz[1]>=25&&sz[1]<=300))return toast('Tamanho inválido (largura 30–210 mm, altura 25–300 mm).'),null;
+  try{localStorage.setItem('lbl-size',val('e-size'));localStorage.setItem('lbl-from',val('e-from'));localStorage.setItem('lbl-w',val('e-w'));localStorage.setItem('lbl-h',val('e-h'))}catch(e){}
+  var d={sender:val('e-from')||'Imports Brasil',client:client,city:city,addr:document.getElementById('e-addr').value,num:val('e-num'),date:new Date().toLocaleDateString('pt-BR')};
+  d.sender=d.sender.toUpperCase();
+  return {blob:makeLabelsPdf(d,sz[0],sz[1],vols),name:'etiquetas-'+(d.num||'envio')+'.pdf'};
+}
+function openLabels(){
+  var r=labelBlob();if(!r)return;
+  var url=URL.createObjectURL(r.blob),win=window.open(url,'_blank');
+  if(!win){toast('O navegador bloqueou a janela. Baixando o PDF…');saveBlob(url,r.name)}
+  setTimeout(function(){URL.revokeObjectURL(url)},120000);
+}
+function downloadLabels(){
+  var r=labelBlob();if(!r)return;
+  var url=URL.createObjectURL(r.blob);saveBlob(url,r.name);
+  setTimeout(function(){URL.revokeObjectURL(url)},5000);toast('PDF das etiquetas baixado.');
+}
+function saveBlob(url,name){var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function vEtiquetas(){
+  var os=S.orders.filter(function(o){return o.status!=='Cancelado'}).map(function(o){return '<option value="'+o.id+'">'+esc(o.num)+' – '+esc(o.client)+(o.city?' – '+esc(o.city):'')+'</option>'}).join('');
+  var sizes=LBL_SIZES.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>'}).join('');
+  return '<div class="card"><h2>Etiquetas de envio (impressora térmica)</h2>'+
+  '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Escolha um pedido para preencher automaticamente, ou digite uma etiqueta avulsa. Gera um PDF com uma etiqueta por volume, em preto e branco, no tamanho da sua bobina.</p><div class="row">'+
+  '<label style="flex:1 1 100%">Pedido<select id="e-order" onchange="fillLabel()"><option value="">Etiqueta avulsa (digitar)</option>'+os+'</select></label>'+
+  '<label style="flex:2 1 220px">Destinatário<input id="e-client"></label>'+
+  '<label style="flex:2 1 200px">Cidade / UF de destino<input id="e-city" list="cities" placeholder="Ex.: Joinville / SC"></label>'+
+  '<label style="flex:1 1 100%">Endereço / observações (opcional)<textarea id="e-addr" placeholder="Rua, número, bairro, CEP, telefone…"></textarea></label>'+
+  '<label>Nº do pedido (vira código de barras)<input id="e-num" placeholder="Ex.: PED-0001"></label>'+
+  '<label>Volumes (nº de etiquetas)<input id="e-vols" type="number" min="1" max="99" value="1"></label>'+
+  '<label>Tamanho da etiqueta<select id="e-size" onchange="sizeChange()">'+sizes+'</select></label>'+
+  '<label style="flex:2 1 200px">Remetente<input id="e-from" value="Imports Brasil"></label>'+
+  '<div id="e-custom" class="row" style="display:none;flex:1 1 100%"><label>Largura (mm)<input id="e-w" type="number" min="30" max="210" value="100"></label><label>Altura (mm)<input id="e-h" type="number" min="25" max="300" value="150"></label></div>'+
+  '</div><div class="row" style="margin-top:12px"><button class="btn" onclick="openLabels()">Abrir PDF para imprimir</button><button class="btn ghost" onclick="downloadLabels()">Baixar PDF</button></div>'+
+  '<p style="color:var(--muted);font-size:13px;margin:10px 0 0">Na janela de impressão, escolha a impressora térmica, tamanho de papel igual ao da etiqueta e escala 100% (sem "ajustar à página").</p></div>';
+}
+
 /* ---------- telas ---------- */
 function vEstoque(){
   var list=S.products.filter(function(p){var t=(p.sku+' '+p.name+' '+(p.sizes||[]).join(' ')+' '+(p.notes||'')).toLowerCase();return t.indexOf(q.toLowerCase())>-1});
-  var rows=list.map(function(p){return '<tr><td>'+esc(p.sku)+'</td><td>'+esc(p.name)+'</td><td>'+esc((p.sizes||[]).join(', ')||'—')+'</td><td>'+esc(p.notes||'—')+'</td><td class="n">'+p.qty+'</td><td class="n">'+p.min+'</td><td>'+status(p)+'</td><td><button class="btn danger sm" onclick="delProduct(\''+p.id+'\')">Excluir</button></td></tr>'}).join('');
+  var rows=list.map(function(p){return '<tr><td>'+esc(p.sku)+'</td><td>'+esc(p.name)+'</td><td>'+esc((p.sizes||[]).join(', ')||'—')+'</td><td>'+esc(p.notes||'—')+'</td><td class="n">'+p.qty+'</td><td class="n">'+p.min+'</td><td>'+status(p)+'</td><td><button class="btn ghost sm" onclick="openEdit(\''+p.id+'\')">Editar</button> <button class="btn danger sm" onclick="delProduct(\''+p.id+'\')">Excluir</button></td></tr>'}).join('');
   return '<div class="card"><h2>Novo produto</h2><p style="color:var(--muted);font-size:13px;margin:0 0 10px">O código será gerado automaticamente ao salvar.</p><div class="row">'+
   '<label style="flex:2 1 200px">Nome<input id="p-name"></label><label>Tamanhos<input id="p-sizes" placeholder="Ex.: P, M, G, GG"></label>'+
   '<label style="flex:2 1 220px">Observações<textarea id="p-notes" placeholder="Detalhes adicionais do produto"></textarea></label>'+
@@ -381,17 +646,19 @@ function refLabel(){
 }
 function vPedidos(){
   var dl=draft.map(function(i,k){var p=prod(i.pid);return '<li><span>'+(p?esc(p.name):'Produto removido')+' × '+i.qty+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
-  var form=S.products.length?'<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:1 1 100%">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label>'+
+  var form=S.products.length?'<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:2 1 220px">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label><label style="flex:1 1 180px">Cidade de destino<input id="o-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label>'+
   '<label style="flex:2 1 220px">Produto<select id="o-prod">'+opts()+'</select></label><label>Quantidade<input id="o-qty" type="number" min="1" value="1"></label>'+
   '<button class="btn ghost" onclick="addDraft()">Adicionar item</button></div>'+
   (draft.length?'<ul class="draft">'+dl+'</ul><button class="btn" onclick="saveOrder()">Criar pedido</button>':'')+'</div>':'<div class="card empty">Cadastre produtos para criar pedidos.</div>';
   var list=S.orders.map(function(o){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
     var items=o.items.map(function(i){var p=prod(i.pid);return '<li>'+(p?esc(p.name):'Produto removido')+' × '+i.qty+'</li>'}).join('');
-    return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+'</small><ul>'+items+'</ul>'+
-    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button>':'')+'</div>';
+    return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+'</small>'+(o.city?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+'<ul>'+items+'</ul>'+
+    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">Dar baixa no estoque</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button>':'')+'</div>';
   }).join('');
-  return form+'<h2>Pedidos</h2>'+(list||'<div class="empty">Nenhum pedido criado.</div>');
+  var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
+  var dlc='<datalist id="cities">'+cities.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist>';
+  return form+dlc+'<h2>Pedidos</h2>'+(list||'<div class="empty">Nenhum pedido criado.</div>');
 }
 function vHist(){
   if(!S.moves.length)return '<div class="card empty">Nenhuma movimentação registrada.</div>';
@@ -417,10 +684,11 @@ function vRelatorios(){
     (rows||'<tr><td colspan="7" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div></div></div>';
 }
 function render(keep,focus){
-  var tabs=[['estoque','Estoque'],['mover','Movimentar'],['pedidos','Pedidos'],['hist','Histórico'],['relatorios','Relatório']];
+  var tabs=[['estoque','Estoque'],['mover','Movimentar'],['pedidos','Pedidos'],['hist','Histórico'],['etiquetas','Etiquetas'],['relatorios','Relatório']];
   document.getElementById('nav').innerHTML=tabs.map(function(t){return '<button class="'+(tab===t[0]?'on':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
-  var v={estoque:vEstoque,mover:vMover,pedidos:vPedidos,hist:vHist,relatorios:vRelatorios}[tab]();
+  var v={estoque:vEstoque,mover:vMover,pedidos:vPedidos,hist:vHist,etiquetas:vEtiquetas,relatorios:vRelatorios}[tab]();
   document.getElementById('view').innerHTML=v;
+  if(tab==='etiquetas')initLabelTab();
   if(focus){var el=document.getElementById(focus);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
 }
 /* Atualização vinda de outro usuário: redesenha sem perder o que está sendo digitado */
@@ -437,6 +705,7 @@ function refresh(){
     el.value=vals[id];
   });
   if(document.getElementById('m-type'))refLabel();
+  if(document.getElementById('e-size'))sizeChange();
   if(fid){var f=document.getElementById(fid);if(f){f.focus();try{if(ss!==null)f.setSelectionRange(ss,se)}catch(e){}}}
   window.scrollTo(0,sy);
 }
@@ -469,7 +738,7 @@ function stopListening(){unsubs.forEach(function(u){u()});unsubs=[];ready={p:fal
 function startListening(){
   var onErr=function(e){fail(e)};
   unsubs.push(db.collection('products').onSnapshot(function(s){
-    S.products=s.docs.map(function(d){return Object.assign({sizes:[],notes:''},d.data(),{id:d.id})}).sort(function(a,b){return a.sku.localeCompare(b.sku)});
+    S.products=s.docs.map(function(d){return Object.assign({sizes:[],notes:''},d.data(),{id:d.id})}).sort(function(a,b){return a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'})||a.sku.localeCompare(b.sku)});
     ready.p=true;refresh();
   },onErr));
   unsubs.push(db.collection('orders').onSnapshot(function(s){
