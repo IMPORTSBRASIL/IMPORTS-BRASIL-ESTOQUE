@@ -5,7 +5,7 @@ o que um funcionário lança aparece na hora para todos, em qualquer celular ou 
 Tudo roda em planos **gratuitos** (Firebase + um host estático).
 
 Arquivos:
-- `index.html`, `sw.js`, `manifest.json`, `icon-*.png` – o site
+- `index.html`, `sw.js`, `manifest.json`, `logo.png`, `icon-*.png` – o site
 - `firebase-config.js` – **você edita** (passo 4)
 - `firestore.rules` – regras de segurança do banco (passo 3)
 
@@ -109,7 +109,22 @@ etiquetas e relatórios continuam iguais).
   agora começam recolhidas, com um botão **Expandir / Recolher** em cada uma — a página fica
   curta e limpa, e o resumo com os números continua sempre visível. No **Gerar PDF** as duas
   tabelas saem completas, recolhidas ou não na tela.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.5).
+- **CPF / CNPJ com formato automático:** no campo **CPF / CNPJ (opcional)** da aba
+  Etiquetas basta digitar os números — o programa coloca os pontos, a barra e o traço
+  sozinho e mostra embaixo se o que você digitou é **CPF** (11 números) ou **CNPJ**
+  (14 números). Na etiqueta sai escrito `CPF: 000.000.000-00` ou
+  `CNPJ: 00.000.000/0000-00` conforme o caso. O campo começa sempre **vazio**: o número
+  não fica mais guardado no aparelho.
+- **Peso na etiqueta (opcional):** na aba **Etiquetas** há agora o campo **Peso (opcional)**
+  — pode digitar livremente, por exemplo `2,5 kg` ou `850 g`. Se preenchido, o peso sai
+  impresso na etiqueta logo abaixo do CPF/CNPJ; se ficar em branco, nada muda na etiqueta.
+  O valor fica guardado no aparelho para a próxima etiqueta.
+- **Logo da empresa no programa:** o logotipo IMPORTS BRASIL aparece no cabeçalho e na tela
+  de login (substituiu o quadradinho com "IB").
+- **Ícone e nome ao instalar no celular:** quando o site é adicionado à tela inicial
+  (Android: "Instalar app" / iPhone: "Adicionar à Tela de Início"), o atalho agora usa a
+  **logo da empresa** como ícone e aparece com o nome **IMPORTS BRASIL**.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.8).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
@@ -117,6 +132,11 @@ No repositório: **Add file > Upload files** e envie estes arquivos, substituind
 - `index.html`
 - `sw.js`
 - `manifest.json`
+- `logo.png`
+- `icon-192.png`
+- `icon-180.png`
+- `icon-512.png`
+- `icon-maskable-512.png`
 - `LEIA-ME.md`
 
 **Não substitua o seu `firebase-config.js`**: ele já tem os dados do seu projeto e este

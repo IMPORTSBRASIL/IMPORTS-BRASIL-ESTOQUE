@@ -1,5 +1,5 @@
-const CACHE = "estoque-web-v9";
-const FILES = ["./", "./index.html", "./firebase-config.js", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
+const CACHE = "estoque-web-v12";
+const FILES = ["./", "./index.html", "./firebase-config.js", "./manifest.json", "./logo.png", "./icon-192.png", "./icon-180.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
