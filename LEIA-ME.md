@@ -98,7 +98,11 @@ etiquetas e relatórios continuam iguais).
 - **Pedidos com tamanho:** na aba Pedidos (e em Movimentar), a lista de produtos mostra o nome
   completo com o tamanho e o saldo — por exemplo `IMP-0031 – Babydoll (P) · 14 un.`. Os itens
   adicionados ao pedido e os pedidos já criados também aparecem com o tamanho ao lado do nome.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.2).
+- **Soma por produto no Relatório:** a aba Relatório agora tem a tabela **Soma por produto**
+  (antes do inventário completo), com cada produto agrupado, o total somado de todas as
+  variações, o detalhe `tamanho × quantidade`, o mínimo somado e a situação. Ela também sai
+  no PDF (botão **Gerar PDF**), junto com o resto do relatório.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.3).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

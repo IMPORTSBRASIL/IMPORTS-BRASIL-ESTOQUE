@@ -314,6 +314,19 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   .t-hist td:nth-child(4)::before{content:"Qtd."}
   .t-hist td:nth-child(5)::before{content:"Pedido / nota"}
   .t-hist td:nth-child(6)::before{content:"Usuário"}
+  /* soma por produto no relatório */
+  .t-resumo{display:block;font-size:14px}
+  .t-resumo thead{display:none}
+  .t-resumo tbody{display:block}
+  .t-resumo tr{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin:0 0 10px;box-shadow:var(--shadow-sm)}
+  .t-resumo td{display:flex;align-items:baseline;justify-content:space-between;gap:14px;border:0;padding:4px 0;white-space:normal;text-align:right;font-weight:500;word-break:break-word}
+  .t-resumo td::before{content:"";flex:0 0 auto;color:var(--muted);font-size:11.5px;font-weight:650;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding-top:2px}
+  .t-resumo td:nth-child(1)::before{content:"Produto"}
+  .t-resumo td:nth-child(2)::before{content:"Variações"}
+  .t-resumo td:nth-child(3)::before{content:"Total"}
+  .t-resumo td:nth-child(4)::before{content:"Mínimo"}
+  .t-resumo td:nth-child(5)::before{content:"Situação"}
+  .t-resumo td:nth-child(1){font-size:16px;font-weight:700;letter-spacing:-.01em;padding-bottom:8px}
   .t-rel td:nth-child(1)::before{content:"Código"}
   .t-rel td:nth-child(2)::before{content:"Produto"}
   .t-rel td:nth-child(3)::before{content:"Tamanhos"}
@@ -363,6 +376,10 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   td::before{display:none!important;content:none!important}
   th{background:#eef1f3!important;color:#42515b!important;font-size:10px}
   .tag{background:#f2f4f5!important;color:#26353d!important}
+  .t-resumo th:nth-child(1),.t-resumo td:nth-child(1){width:20%}
+  .t-resumo th:nth-child(2),.t-resumo td:nth-child(2){width:46%}
+  .t-resumo th:nth-child(3),.t-resumo td:nth-child(3),.t-resumo th:nth-child(4),.t-resumo td:nth-child(4){width:9%}
+  .t-resumo th:nth-child(5),.t-resumo td:nth-child(5){width:16%}
   .modal,.calcpop{display:none!important}
 }
 </style>
@@ -381,7 +398,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.2</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.3</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -390,7 +407,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.2</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.3</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -1107,6 +1124,13 @@ function vHist(){
 function vRelatorios(){
   var products=S.products.slice().sort(function(a,b){return a.name.localeCompare(b.name,'pt-BR')});
   var total=products.reduce(function(sum,p){return sum+p.qty},0);
+  var groups=groupsOf();
+  var gtotal=groups.reduce(function(sum,g){return sum+g.qty},0);
+  var gmin=groups.reduce(function(sum,g){return sum+g.min},0);
+  var grows=groups.map(function(g){
+    var det=g.items.map(function(p){return esc((p.sizes||[]).join(', ')||p.sku||'—')+' × '+p.qty}).join(' · ');
+    return '<tr><td>'+esc(g.name)+'</td><td>'+det+'</td><td class="n">'+g.qty+'</td><td class="n">'+g.min+'</td><td>'+grpTag(g)+'</td></tr>';
+  }).join('');
   var withStock=products.filter(function(p){return p.qty>0}).length;
   var low=products.filter(function(p){return p.qty>0&&p.qty<=p.min}).length;
   var zero=products.filter(function(p){return p.qty<=0}).length;
@@ -1118,7 +1142,10 @@ function vRelatorios(){
     '<div class="report-stat"><span>Produtos com saldo</span><strong>'+withStock+'</strong></div>'+
     '<div class="report-stat"><span>Unidades em estoque</span><strong>'+total+'</strong></div>'+
     '<div class="report-stat"><span>Baixo / zerado</span><strong>'+low+' / '+zero+'</strong></div></div>'+
-    '<h2>Inventário completo</h2><div class="scroll"><table class="t-rel"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
+    '<h2>Soma por produto</h2><p class="report-subtitle" style="margin:-4px 0 8px">'+groups.length+' produto(s) agrupado(s) · '+gtotal+' unidades somadas (todas as variações e tamanhos)'+(gmin?' · mínimo somado '+gmin:'')+'</p>'+
+    '<div class="scroll"><table class="t-resumo"><thead><tr><th>Produto</th><th>Variações (tamanho × qtd.)</th><th class="n">Total</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
+    (grows||'<tr><td colspan="5" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div>'+
+    '<h2 style="margin-top:18px">Inventário completo</h2><div class="scroll"><table class="t-rel"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mín.</th><th>Situação</th></tr></thead><tbody>'+
     (rows||'<tr><td colspan="7" class="empty">Nenhum produto cadastrado.</td></tr>')+'</tbody></table></div></div></div>';
 }
 function render(keep,focus){
