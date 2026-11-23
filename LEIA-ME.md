@@ -140,13 +140,12 @@ etiquetas e relatórios continuam iguais).
   pontos, a barra e o traço sozinho — e o CNPJ sai impresso na faixa escura do topo da
   etiqueta, logo abaixo de **IMPORTS BRASIL**. O valor fica guardado no aparelho para as
   próximas etiquetas; se deixar em branco, a etiqueta continua como antes.
-- **Pedido avulso (sem estoque):** na aba **Pedidos** há o cartão **Pedido avulso (sem
-  estoque)** com o botão **Novo pedido avulso**. Nele você escreve o nome do item, o tamanho
-  (opcional) e a quantidade — não precisa o item estar cadastrado no estoque. Serve para
-  controlar pedidos feitos em outro setor: o pedido entra na lista normalmente, com número,
-  cliente, cidade, etiqueta e PDF, mas **não baixa estoque nem aparece no histórico de
-  movimentações**. Na lista ele aparece marcado como “pedido avulso” e o botão de conclusão
-  é **Marcar como atendido** (em vez de “Dar baixa no estoque”).
+- **Pedido avulso (sem estoque):** o cartão **Pedido avulso (sem estoque)** foi removido da
+  aba **Pedidos** na versão 3.6. Para pedidos com itens que não estão cadastrados, use o
+  campo **Item fora do estoque (nome livre)** dentro do **Novo pedido** — o pedido pode
+  misturar itens do estoque e itens livres, e os itens livres não baixam estoque. Pedidos
+  avulsos antigos continuam na lista e no histórico, marcados como “pedido avulso”, com o
+  botão **Marcar como atendido**.
 - **Histórico de pedidos:** nova aba **Hist. pedidos** com busca em **todos** os pedidos
   (pendentes, atendidos e cancelados). O campo **Buscar por nome** procura no nome do cliente,
   no nome dos itens, no número do pedido, na cidade e no usuário; pode digitar mais de uma

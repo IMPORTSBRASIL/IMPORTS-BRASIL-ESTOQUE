@@ -428,7 +428,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.5</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.6</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -437,7 +437,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.5</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.6</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -475,7 +475,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-var S={products:[],orders:[],moves:[],seq:1},tab='estoque',draft=[],avDraft=[],avOpen=false,q='';
+var S={products:[],orders:[],moves:[],seq:1},tab='estoque',draft=[],q='';
 var hp={q:'',from:'',to:'',status:''};
 var oeItems=[];
 var db=null,auth=null,user=null,unsubs=[],ready={p:false,o:false,m:false,c:false},busy=false;
@@ -675,36 +675,6 @@ function addFreeDraft(){
   window._oFree='';window._oFsize='';render(true,'o-free');
 }
 function rmDraft(i){draft.splice(i,1);render(true)}
-/* ---------- pedido avulso (itens que não existem no estoque) ---------- */
-function toggleAvulso(){avOpen=!avOpen;render()}
-function addAvItem(){
-  var name=val('av-item'),size=val('av-size'),qty=parseInt(val('av-qty'));
-  if(!name)return toast('Escreva o nome do item.');
-  if(!qty||qty<1)return toast('Informe uma quantidade maior que zero.');
-  var full=name+(size?' ('+size.toUpperCase()+')':'');
-  var ex=avDraft.find(function(i){return i.name.toLowerCase()===full.toLowerCase()});
-  if(ex)ex.qty+=qty;else avDraft.push({pid:'av-'+uid(),name:full,qty:qty});
-  window._avItem='';window._avSize='';render(true,'av-item');
-}
-function rmAvItem(i){avDraft.splice(i,1);render()}
-async function saveAvOrder(){
-  var client=val('av-client'),city=val('av-city');
-  if(!client)return toast('Informe o cliente.');
-  if(!city)return toast('Informe a cidade de destino do pedido.');
-  if(!avDraft.length)return toast('Adicione ao menos um item.');
-  var num;
-  try{
-    await db.runTransaction(async function(t){
-      var cref=db.doc('meta/counters'),c=await t.get(cref);
-      var n=(c.exists&&c.data().seq)||S.seq||1;
-      num='PED-'+pad(n);
-      t.set(cref,{seq:n+1},{merge:true});
-      t.set(db.collection('orders').doc(uid()),{num:num,client:client,city:city,date:Date.now(),status:'Pendente',avulso:true,items:clean(avDraft),by:user.email});
-    });
-    avDraft=[];window._avCl='';window._avCity='';window._avItem='';window._avSize='';avOpen=false;
-    toast('Pedido avulso '+num+' criado.');render();
-  }catch(e){fail(e)}
-}
 async function saveOrder(){
   var client=val('o-client'),city=val('o-city');
   if(!client)return toast('Informe o cliente.');
@@ -1389,17 +1359,6 @@ function refLabel(){
 }
 function vPedidos(){
   var dl=draft.map(function(i,k){return '<li><span>'+esc(itemName(i))+' × '+i.qty+(isFreeItem(i)?' <span class="tag">fora do estoque</span>':'')+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
-  var avDl=avDraft.map(function(i,k){return '<li><span>'+esc(i.name)+' × '+i.qty+'</span><button class="btn danger sm" onclick="rmAvItem('+k+')">Remover</button></li>'}).join('');
-  var avCard='<div class="card"><div class="listhead" style="margin:0 0 6px"><h2 style="margin:0">Pedido avulso (sem estoque)</h2><button class="btn ghost sm" onclick="toggleAvulso()">'+(avOpen?'Fechar':'Novo pedido avulso')+'</button></div>'+
-  '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Para controlar pedidos feitos em outro setor, com itens que não estão cadastrados no estoque. Não altera o estoque nem aparece no histórico de movimentações.</p>'+
-  (avOpen?'<div class="row">'+
-  '<label style="flex:2 1 220px">Cliente<input id="av-client" value="'+esc(window._avCl||'')+'" oninput="window._avCl=this.value"></label>'+
-  '<label style="flex:1 1 180px">Cidade de destino<input id="av-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._avCity||'')+'" oninput="window._avCity=this.value"></label>'+
-  '<label style="flex:2 1 220px">Item (nome livre)<input id="av-item" placeholder="Ex.: Camiseta personalizada" value="'+esc(window._avItem||'')+'" oninput="window._avItem=this.value"></label>'+
-  '<label style="flex:0 1 130px">Tamanho / variação<input id="av-size" maxlength="20" placeholder="Opcional" value="'+esc(window._avSize||'')+'" oninput="window._avSize=this.value"></label>'+
-  '<label style="flex:0 1 110px">Quantidade<input id="av-qty" type="number" min="1" value="1"></label>'+
-  '<button class="btn ghost" onclick="addAvItem()">Adicionar item</button></div>'+
-  (avDraft.length?'<ul class="draft">'+avDl+'</ul><button class="btn" onclick="saveAvOrder()">Criar pedido avulso</button>':'')+'':'')+'</div>';
   var form='<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:2 1 220px">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label><label style="flex:1 1 180px">Cidade de destino<input id="o-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label></div>'+
   (S.products.length?'<div class="row"><label style="flex:2 1 220px">Produto do estoque<select id="o-prod">'+opts()+'</select></label><label>Quantidade<input id="o-qty" type="number" min="1" value="1"></label>'+
   '<button class="btn ghost" onclick="addDraft()">Adicionar item do estoque</button></div>':'<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Nenhum produto cadastrado no estoque. Você pode montar o pedido só com itens fora do estoque.</p>')+
@@ -1416,7 +1375,7 @@ function vPedidos(){
   }).join('');
   var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
   var dlc='<datalist id="cities">'+cities.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist>';
-  return avCard+form+dlc+'<h2>Pedidos</h2>'+(list||'<div class="empty">Nenhum pedido criado.</div>');
+  return form+dlc+'<h2>Pedidos</h2>'+(list||'<div class="empty">Nenhum pedido criado.</div>');
 }
 /* ---------- histórico de pedidos (busca por nome e data) ---------- */
 function hpDate(iso,end){
