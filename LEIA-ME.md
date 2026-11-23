@@ -154,7 +154,22 @@ etiquetas e relatórios continuam iguais).
   entra inteiro), e o filtro **Status** mostra só pendentes, atendidos ou cancelados.
   Cada linha traz data, número, cliente, cidade, itens, total de unidades e status, com os
   botões **PDF** e **Etiqueta**. O botão **Limpar filtros** volta a mostrar todos os pedidos.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (3.3).
+- **Item fora do estoque no pedido normal:** dentro de **Novo pedido** (aba Pedidos) há o
+  campo **Item fora do estoque (nome livre)**, com tamanho/variação opcional e quantidade.
+  Você pode misturar itens do estoque com itens digitados no mesmo pedido — útil quando parte
+  do pedido é de outro setor. O item digitado aparece marcado como “fora do estoque”; ao
+  clicar em **Dar baixa no estoque**, só os itens cadastrados são descontados e o sistema avisa
+  que os itens fora do estoque não alteram o estoque. Se não houver nenhum produto cadastrado,
+  o pedido pode ser montado só com itens livres.
+- **Editar e excluir pedidos:** cada pedido na lista da aba **Pedidos** tem os botões
+  **Editar pedido** e **Excluir pedido**. Em **Editar** dá para corrigir cliente e cidade e,
+  enquanto o pedido está **Pendente**, mudar os itens: alterar quantidade (ou deixar 0 para
+  tirar), usar **Remover**, adicionar itens do estoque e itens fora do estoque. Pedidos já
+  **Atendidos** aceitam só a correção de cliente e cidade (os itens não mudam porque o estoque
+  já foi descontado), e pedidos cancelados não são editáveis. **Excluir** funciona para
+  qualquer pedido: nos atendidos, aparece um aviso de que as unidades não voltam para o
+  estoque. A exclusão é definitiva e pede confirmação.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (3.5).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

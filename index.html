@@ -428,7 +428,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.3</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.5</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -437,7 +437,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.3</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.5</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -466,6 +466,9 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <p style="color:var(--muted);font-size:13px;margin:10px 0">Se alterar a quantidade, a diferença é lançada no Histórico como "Ajuste de estoque".</p>
 <div class="row"><button class="btn" onclick="saveEdit()">Salvar alterações</button><button class="btn ghost" onclick="closeEdit()">Cancelar</button></div>
 </div></div>
+<div id="oedit" class="modal" style="display:none" onclick="if(event.target===this)closeOrderEdit()"><div class="card box" role="dialog" aria-modal="true" aria-label="Editar pedido">
+<div id="oedit-body"></div>
+</div></div>
 <div id="msg" role="status"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -474,6 +477,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <script>
 var S={products:[],orders:[],moves:[],seq:1},tab='estoque',draft=[],avDraft=[],avOpen=false,q='';
 var hp={q:'',from:'',to:'',status:''};
+var oeItems=[];
 var db=null,auth=null,user=null,unsubs=[],ready={p:false,o:false,m:false,c:false},busy=false;
 
 /* ---------- utilidades ---------- */
@@ -501,6 +505,8 @@ function itemName(i){
   if(p)return p.name+((p.sizes&&p.sizes.length)?' ('+p.sizes.join(', ')+')':'');
   return i.name||'Produto removido';
 }
+/* item digitado à mão: não existe no estoque, então não baixa estoque */
+function isFreeItem(i){return i.pid.indexOf('av-')===0||(!prod(i.pid)&&!!i.name)}
 function opts(){return S.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.sku)+' – '+esc(p.name)+sizeOf(p)+' · '+p.qty+' un.</option>'}).join('')}
 function newMove(pid,p,type,qty,ref){return {date:Date.now(),type:type,pid:pid,name:p.name,sku:p.sku,qty:qty,ref:ref||'',by:user?user.email:''}}
 function go(t){tab=t;render()}
@@ -658,6 +664,16 @@ function addDraft(){
   if(ex)ex.qty+=qty;else draft.push({pid:pid,qty:qty});
   render(true);
 }
+/* item livre dentro do pedido normal (não existe no estoque) */
+function addFreeDraft(){
+  var name=val('o-free'),size=val('o-fsize'),qty=parseInt(val('o-fqty'));
+  if(!name)return toast('Escreva o nome do item fora do estoque.');
+  if(!qty||qty<1)return toast('Informe uma quantidade maior que zero.');
+  var full=name+(size?' ('+size.toUpperCase()+')':'');
+  var ex=draft.find(function(i){return isFreeItem(i)&&i.name.toLowerCase()===full.toLowerCase()});
+  if(ex)ex.qty+=qty;else draft.push({pid:'av-'+uid(),name:full,qty:qty});
+  window._oFree='';window._oFsize='';render(true,'o-free');
+}
 function rmDraft(i){draft.splice(i,1);render(true)}
 /* ---------- pedido avulso (itens que não existem no estoque) ---------- */
 function toggleAvulso(){avOpen=!avOpen;render()}
@@ -703,7 +719,7 @@ async function saveOrder(){
       t.set(cref,{seq:n+1},{merge:true});
       t.set(db.collection('orders').doc(uid()),{num:num,client:client,city:city,date:Date.now(),status:'Pendente',items:clean(draft),by:user.email});
     });
-    draft=[];window._cl='';window._city='';toast('Pedido '+num+' criado.');render();
+    draft=[];window._cl='';window._city='';window._oFree='';window._oFsize='';toast('Pedido '+num+' criado.');render();
   }catch(e){fail(e)}
 }
 async function fulfill(id){
@@ -716,7 +732,7 @@ async function fulfill(id){
       if(o.status!=='Pendente')throw new Error('Este pedido já foi '+o.status.toLowerCase()+' por outro usuário.');
       /* pedido avulso: não mexe no estoque, só marca como atendido */
       if(o.avulso){t.update(oref,{status:'Atendido'});msg='Pedido avulso '+o.num+' marcado como atendido.';return}
-      var need={};o.items.forEach(function(i){need[i.pid]=(need[i.pid]||0)+i.qty});
+      var need={},free=0;o.items.forEach(function(i){if(isFreeItem(i)){free++;return}need[i.pid]=(need[i.pid]||0)+i.qty});
       var pids=Object.keys(need),snaps=[];
       for(var k=0;k<pids.length;k++)snaps.push(await t.get(db.collection('products').doc(pids[k])));
       var short=[];
@@ -728,7 +744,7 @@ async function fulfill(id){
         t.set(db.collection('moves').doc(uid()),newMove(pids[k],p,'Saída',need[pids[k]],o.num));
       });
       t.update(oref,{status:'Atendido'});
-      msg='Baixa do pedido '+o.num+' concluída.';
+      msg='Baixa do pedido '+o.num+' concluída.'+(free?' Os itens fora do estoque não alteram o estoque.':'');
     });
     toast(msg);
   }catch(e){fail(e)}
@@ -747,16 +763,93 @@ async function cancelOrder(id){
 }
 async function delOrder(id){
   var o=S.orders.find(function(x){return x.id===id});
-  if(!o||o.status!=='Cancelado')return toast('Só é possível excluir pedidos cancelados.');
-  if(!confirm('Excluir definitivamente o pedido '+o.num+' ('+o.client+')? Esta ação não pode ser desfeita.'))return;
+  if(!o)return toast('Pedido não encontrado.');
+  var aviso=o.status==='Atendido'?'\n\nATENÇÃO: este pedido já foi atendido. As quantidades NÃO voltam para o estoque e o histórico de movimentações continua igual.':'';
+  if(!confirm('Excluir definitivamente o pedido '+o.num+' ('+o.client+')?'+aviso+'\n\nEsta ação não pode ser desfeita.'))return;
   try{
     await db.runTransaction(async function(t){
       var ref=db.collection('orders').doc(id),d=await t.get(ref);
       if(!d.exists)throw new Error('Este pedido já foi excluído.');
-      if(d.data().status!=='Cancelado')throw new Error('Este pedido não está mais cancelado.');
       t.delete(ref);
     });
+    if(window._oe===id)closeOrderEdit();
     toast('Pedido '+o.num+' excluído.');
+  }catch(e){fail(e)}
+}
+/* ---------- editar pedido ---------- */
+function editOrder(id){
+  var o=S.orders.find(function(x){return x.id===id});
+  if(!o)return toast('Pedido não encontrado.');
+  if(o.status==='Cancelado')return toast('Pedido cancelado não pode ser editado.');
+  window._oe=id;window._oeCl=o.client;window._oeCity=o.city||'';
+  window._oeF='';window._oeFsize='';
+  oeItems=o.items.map(function(i){return i.name?{pid:i.pid,name:i.name,qty:i.qty}:{pid:i.pid,qty:i.qty}});
+  document.getElementById('oedit').style.display='block';
+  oeBox();
+}
+function closeOrderEdit(){document.getElementById('oedit').style.display='none';window._oe=null;oeItems=[]}
+function oeBox(){
+  var o=S.orders.find(function(x){return x.id===window._oe});
+  if(!o)return closeOrderEdit();
+  var editable=o.status==='Pendente';
+  var items=oeItems.map(function(i,k){
+    return '<li><span>'+esc(itemName(i))+(isFreeItem(i)?' <span class="tag">fora do estoque</span>':'')+'</span>'+
+      (editable?'<span style="display:flex;align-items:center;gap:8px"><input type="number" min="0" inputmode="numeric" value="'+i.qty+'" oninput="oeQty('+k+',this.value)" style="width:78px" aria-label="Quantidade"><button class="btn danger sm" onclick="oeRm('+k+')">Remover</button></span>':'<span>'+i.qty+' un.</span>')+'</li>';
+  }).join('');
+  var html='<div class="listhead" style="margin:0 0 6px"><h2 style="margin:0">Editar pedido '+esc(o.num)+'</h2><button class="btn ghost sm" onclick="closeOrderEdit()">Fechar</button></div>'+
+    '<p class="report-subtitle" style="margin:0 0 10px">Status: <strong>'+o.status+'</strong>'+(o.avulso?' · pedido avulso':'')+'</p>'+
+    '<div class="row"><label style="flex:2 1 220px">Cliente<input id="oe-client" value="'+esc(window._oeCl||'')+'" oninput="window._oeCl=this.value"></label>'+
+    '<label style="flex:1 1 180px">Cidade de destino<input id="oe-city" value="'+esc(window._oeCity||'')+'" oninput="window._oeCity=this.value"></label></div>'+
+    '<h3 style="margin:16px 0 6px;font-size:15px">Itens</h3>'+
+    (items?'<ul class="draft">'+items+'</ul>':'<p class="report-subtitle">Nenhum item no pedido.</p>')+
+    (editable?'<div class="row" style="margin-top:12px">'+ (S.products.length?'<label style="flex:2 1 220px">Produto do estoque<select id="oe-prod">'+opts()+'</select></label><label>Quantidade<input id="oe-qty" type="number" min="1" value="1"></label><button class="btn ghost" onclick="oeAddStock()">Adicionar item do estoque</button>':'<p class="report-subtitle" style="flex:1 1 100%;margin:0">Nenhum produto cadastrado no estoque. Use o item fora do estoque abaixo.</p>')+'</div>'+
+      '<div class="row"><label style="flex:2 1 220px">Item fora do estoque (nome livre)<input id="oe-free" placeholder="Ex.: Camiseta personalizada" value="'+esc(window._oeF||'')+'" oninput="window._oeF=this.value"></label>'+
+      '<label style="flex:0 1 130px">Tamanho / variação<input id="oe-fsize" maxlength="20" placeholder="Opcional" value="'+esc(window._oeFsize||'')+'" oninput="window._oeFsize=this.value"></label>'+
+      '<label style="flex:0 1 110px">Quantidade<input id="oe-fqty" type="number" min="1" value="1"></label>'+
+      '<button class="btn ghost" onclick="oeAddFree()">Adicionar item fora do estoque</button></div>'+
+      '<p class="report-subtitle" style="margin:10px 0 0">Para tirar um item, deixe a quantidade em 0 ou toque em Remover.</p>':
+      '<p class="report-subtitle" style="margin:12px 0 0">Este pedido já foi atendido: o cliente e a cidade podem ser corrigidos, mas os itens não podem ser alterados porque o estoque já foi descontado.</p>')+
+    '<div class="row" style="margin-top:14px"><button class="btn" onclick="saveOrderEdit()">Salvar alterações</button><button class="btn ghost" onclick="closeOrderEdit()">Cancelar</button></div>';
+  document.getElementById('oedit-body').innerHTML=html;
+}
+function oeQty(k,v){if(oeItems[k])oeItems[k].qty=Math.max(0,parseInt(v)||0)}
+function oeRm(k){oeItems.splice(k,1);oeBox()}
+function oeAddStock(){
+  if(!S.products.length)return toast('Nenhum produto cadastrado no estoque.');
+  var pid=val('oe-prod'),qty=parseInt(val('oe-qty'));
+  if(!pid||!qty||qty<1)return toast('Escolha o produto e a quantidade.');
+  var ex=oeItems.find(function(i){return i.pid===pid});
+  if(ex)ex.qty+=qty;else oeItems.push({pid:pid,qty:qty});
+  oeBox();
+}
+function oeAddFree(){
+  var name=val('oe-free'),size=val('oe-fsize'),qty=parseInt(val('oe-fqty'));
+  if(!name)return toast('Escreva o nome do item fora do estoque.');
+  if(!qty||qty<1)return toast('Informe uma quantidade maior que zero.');
+  var full=name+(size?' ('+size.toUpperCase()+')':'');
+  var ex=oeItems.find(function(i){return isFreeItem(i)&&i.name.toLowerCase()===full.toLowerCase()});
+  if(ex)ex.qty+=qty;else oeItems.push({pid:'av-'+uid(),name:full,qty:qty});
+  window._oeF='';window._oeFsize='';oeBox();
+}
+async function saveOrderEdit(){
+  var id=window._oe;if(!id)return;
+  var o=S.orders.find(function(x){return x.id===id});
+  if(!o)return toast('Pedido não encontrado.');
+  var client=val('oe-client'),city=val('oe-city');
+  if(!client)return toast('Informe o cliente.');
+  if(!city)return toast('Informe a cidade de destino do pedido.');
+  var editable=o.status==='Pendente';
+  var items=editable?oeItems.filter(function(i){return i.qty>0}).map(function(i){return i.name?{pid:i.pid,name:i.name,qty:i.qty}:{pid:i.pid,qty:i.qty}}):clean(o.items);
+  if(!items.length)return toast('Adicione ao menos um item.');
+  try{
+    await db.runTransaction(async function(t){
+      var ref=db.collection('orders').doc(id),d=await t.get(ref);
+      if(!d.exists)throw new Error('Este pedido já foi excluído.');
+      if(editable&&d.data().status!=='Pendente')throw new Error('Este pedido já foi '+String(d.data().status).toLowerCase()+' por outro usuário. Os itens não foram alterados.');
+      t.update(ref,{client:client,city:city,items:items});
+    });
+    toast('Pedido '+o.num+' atualizado.');
+    closeOrderEdit();render();
   }catch(e){fail(e)}
 }
 async function delMovement(id){
@@ -1295,7 +1388,7 @@ function refLabel(){
   document.getElementById('m-ref').placeholder=s?'Ex.: PED-0001':'';
 }
 function vPedidos(){
-  var dl=draft.map(function(i,k){return '<li><span>'+esc(itemName(i))+' × '+i.qty+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
+  var dl=draft.map(function(i,k){return '<li><span>'+esc(itemName(i))+' × '+i.qty+(isFreeItem(i)?' <span class="tag">fora do estoque</span>':'')+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
   var avDl=avDraft.map(function(i,k){return '<li><span>'+esc(i.name)+' × '+i.qty+'</span><button class="btn danger sm" onclick="rmAvItem('+k+')">Remover</button></li>'}).join('');
   var avCard='<div class="card"><div class="listhead" style="margin:0 0 6px"><h2 style="margin:0">Pedido avulso (sem estoque)</h2><button class="btn ghost sm" onclick="toggleAvulso()">'+(avOpen?'Fechar':'Novo pedido avulso')+'</button></div>'+
   '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Para controlar pedidos feitos em outro setor, com itens que não estão cadastrados no estoque. Não altera o estoque nem aparece no histórico de movimentações.</p>'+
@@ -1307,15 +1400,19 @@ function vPedidos(){
   '<label style="flex:0 1 110px">Quantidade<input id="av-qty" type="number" min="1" value="1"></label>'+
   '<button class="btn ghost" onclick="addAvItem()">Adicionar item</button></div>'+
   (avDraft.length?'<ul class="draft">'+avDl+'</ul><button class="btn" onclick="saveAvOrder()">Criar pedido avulso</button>':'')+'':'')+'</div>';
-  var form=S.products.length?'<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:2 1 220px">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label><label style="flex:1 1 180px">Cidade de destino<input id="o-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label>'+
-  '<label style="flex:2 1 220px">Produto<select id="o-prod">'+opts()+'</select></label><label>Quantidade<input id="o-qty" type="number" min="1" value="1"></label>'+
-  '<button class="btn ghost" onclick="addDraft()">Adicionar item</button></div>'+
-  (draft.length?'<ul class="draft">'+dl+'</ul><button class="btn" onclick="saveOrder()">Criar pedido</button>':'')+'</div>':'<div class="card empty">Cadastre produtos para criar pedidos normais, ou use o pedido avulso acima para itens fora do estoque.</div>';
+  var form='<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:2 1 220px">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label><label style="flex:1 1 180px">Cidade de destino<input id="o-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label></div>'+
+  (S.products.length?'<div class="row"><label style="flex:2 1 220px">Produto do estoque<select id="o-prod">'+opts()+'</select></label><label>Quantidade<input id="o-qty" type="number" min="1" value="1"></label>'+
+  '<button class="btn ghost" onclick="addDraft()">Adicionar item do estoque</button></div>':'<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Nenhum produto cadastrado no estoque. Você pode montar o pedido só com itens fora do estoque.</p>')+
+  '<div class="row"><label style="flex:2 1 220px">Item fora do estoque (nome livre)<input id="o-free" placeholder="Ex.: Camiseta personalizada" value="'+esc(window._oFree||'')+'" oninput="window._oFree=this.value"></label>'+
+  '<label style="flex:0 1 130px">Tamanho / variação<input id="o-fsize" maxlength="20" placeholder="Opcional" value="'+esc(window._oFsize||'')+'" oninput="window._oFsize=this.value"></label>'+
+  '<label style="flex:0 1 110px">Quantidade<input id="o-fqty" type="number" min="1" value="1"></label>'+
+  '<button class="btn ghost" onclick="addFreeDraft()">Adicionar item fora do estoque</button></div>'+
+  (draft.length?'<ul class="draft">'+dl+'</ul><button class="btn" onclick="saveOrder()">Criar pedido</button>':'')+'</div>';
   var list=S.orders.map(function(o){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
-    var items=o.items.map(function(i){return '<li>'+esc(itemName(i))+' × '+i.qty+'</li>'}).join('');
+    var items=o.items.map(function(i){return '<li>'+esc(itemName(i))+' × '+i.qty+(isFreeItem(i)?' <span class="tag">fora do estoque</span>':'')+'</li>'}).join('');
     return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+(o.avulso?' · pedido avulso':'')+'</small>'+(o.city?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+'<ul>'+items+'</ul>'+
-    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">'+(o.avulso?'Marcar como atendido':'Dar baixa no estoque')+'</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button> ':'')+'<button class="btn ghost sm" onclick="orderPdf(\''+o.id+'\')">Pedido em PDF</button> '+(o.status==='Cancelado'?'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button>':'')+'</div>';
+    (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">'+(o.avulso?'Marcar como atendido':'Dar baixa no estoque')+'</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button> ':'')+'<button class="btn ghost sm" onclick="orderPdf(\''+o.id+'\')">Pedido em PDF</button> '+(o.status==='Cancelado'?'':'<button class="btn ghost sm" onclick="editOrder(\''+o.id+'\')">Editar pedido</button> ')+'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button></div>';
   }).join('');
   var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
   var dlc='<datalist id="cities">'+cities.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist>';
