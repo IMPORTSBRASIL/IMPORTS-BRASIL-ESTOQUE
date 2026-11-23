@@ -140,7 +140,21 @@ etiquetas e relatórios continuam iguais).
   pontos, a barra e o traço sozinho — e o CNPJ sai impresso na faixa escura do topo da
   etiqueta, logo abaixo de **IMPORTS BRASIL**. O valor fica guardado no aparelho para as
   próximas etiquetas; se deixar em branco, a etiqueta continua como antes.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (3.1).
+- **Pedido avulso (sem estoque):** na aba **Pedidos** há o cartão **Pedido avulso (sem
+  estoque)** com o botão **Novo pedido avulso**. Nele você escreve o nome do item, o tamanho
+  (opcional) e a quantidade — não precisa o item estar cadastrado no estoque. Serve para
+  controlar pedidos feitos em outro setor: o pedido entra na lista normalmente, com número,
+  cliente, cidade, etiqueta e PDF, mas **não baixa estoque nem aparece no histórico de
+  movimentações**. Na lista ele aparece marcado como “pedido avulso” e o botão de conclusão
+  é **Marcar como atendido** (em vez de “Dar baixa no estoque”).
+- **Histórico de pedidos:** nova aba **Hist. pedidos** com busca em **todos** os pedidos
+  (pendentes, atendidos e cancelados). O campo **Buscar por nome** procura no nome do cliente,
+  no nome dos itens, no número do pedido, na cidade e no usuário; pode digitar mais de uma
+  palavra (ex.: “ana joinville”). Os campos **De** e **Até** filtram por data (o dia final
+  entra inteiro), e o filtro **Status** mostra só pendentes, atendidos ou cancelados.
+  Cada linha traz data, número, cliente, cidade, itens, total de unidades e status, com os
+  botões **PDF** e **Etiqueta**. O botão **Limpar filtros** volta a mostrar todos os pedidos.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (3.3).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
