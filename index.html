@@ -409,7 +409,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.9</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.1</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
@@ -418,7 +418,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>2.9</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>3.1</strong></span></footer>
 <div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
 <div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
 <div class="calc-sub" id="calc-sub">&nbsp;</div>
@@ -931,9 +931,12 @@ function drawLabel(pg,d,w,h,vi,vn){
   var W=w*MM,H=h*MM,sc=Math.min(w/100,1.15),scf=Math.min(1,sc),big=h>=120,mid=h>=95,compact=h<65;
   var M=Math.max(2.5,Math.min(5,w*0.04))*MM,cw=W-2*M,g=Math.max(1.2,2.2*sc)*MM,lbl=Math.max(5,6.5*scf);
   var hh=Math.max(5.5,9*sc)*MM,fs=hh*0.5;
+  var fromDoc=String(d.fromDoc||'').trim(),hsd=Math.max(4.5,5.5*scf),yName=hh*0.68;
+  if(fromDoc){hh=Math.max(hh,fs*0.85+g*0.4+hsd*1.25+hsd*0.55);yName=fs*0.85+g*0.4}
   pg.gray(0);pg.rect(0,0,W,hh);pg.gray(1);
-  pg.text(d.sender||'',M,hh*0.68,fs,true,'l',cw*0.6);
-  pg.text('VOLUME '+vi+'/'+vn,W-M,hh*0.68,fs,true,'r',cw*0.37);
+  pg.text(d.sender||'',M,yName,fs,true,'l',cw*(fromDoc?0.72:0.6));
+  pg.text('VOLUME '+vi+'/'+vn,W-M,yName,fs,true,'r',cw*0.37);
+  if(fromDoc)pg.text('CNPJ: '+fromDoc,M,yName+hsd*1.25,hsd,false,'l',cw*0.9);
   pg.gray(0);
   var y=hh+g;
   /* rodapé: código de barras */
@@ -993,7 +996,7 @@ function drawLabel(pg,d,w,h,vi,vn){
     if(d.num)pg.text(d.num,M,iy+isz,isz,true,'l',cw*0.55);
     pg.text(d.date,W-M,iy+isz,isz,true,'r',cw*0.4);
   }else{
-    if(d.num){pg.text('PEDIDO',M,iy+lbl*0.8,lbl,false,'l');pg.text(d.num,M,iy+lbl*0.8+15*scf,15*scf,true,'l',cw*0.55)}
+    if(d.num){pg.text('NOTA FISCAL',M,iy+lbl*0.8,lbl,false,'l');pg.text(d.num,M,iy+lbl*0.8+15*scf,15*scf,true,'l',cw*0.55)}
     pg.text('DATA',W-M,iy+lbl*0.8,lbl,false,'r');pg.text(d.date,W-M,iy+lbl*0.8+15*scf,13*scf,true,'r',cw*0.4);
   }
 }
@@ -1128,20 +1131,26 @@ function docMask(el){
   if(tag)tag.textContent=d.length?docType(d):'CPF ou CNPJ';
   try{el.setSelectionRange(m.length,m.length)}catch(e){}
 }
+function maskOnly(el){
+  if(!el)return;
+  var m=maskDoc(el.value);el.value=m;
+  try{el.setSelectionRange(m.length,m.length)}catch(e){}
+}
 function fillLabel(){
   var id=val('e-order'),o=S.orders.find(function(x){return x.id===id});
   if(!o)return;
   document.getElementById('e-client').value=o.client;
   document.getElementById('e-city').value=o.city||'';
-  document.getElementById('e-num').value=o.num;
+  document.getElementById('e-num').value='';
 }
 function labelFor(id){window._pre=id;go('etiquetas')}
 function initLabelTab(){
   try{
-    var sz=localStorage.getItem('lbl-size'),fr=localStorage.getItem('lbl-from'),cw=localStorage.getItem('lbl-w'),ch=localStorage.getItem('lbl-h'),wt=localStorage.getItem('lbl-weight');
+    var sz=localStorage.getItem('lbl-size'),fr=localStorage.getItem('lbl-from'),fd=localStorage.getItem('lbl-from-doc'),cw=localStorage.getItem('lbl-w'),ch=localStorage.getItem('lbl-h'),wt=localStorage.getItem('lbl-weight');
     if(sz&&LBL_SIZES.some(function(x){return x[0]===sz}))document.getElementById('e-size').value=sz;
     if(fr!==null)document.getElementById('e-from').value=fr;
     if(wt!==null)document.getElementById('e-weight').value=wt;
+    if(fd!==null)document.getElementById('e-from-doc').value=fd;
     if(cw)document.getElementById('e-w').value=cw;if(ch)document.getElementById('e-h').value=ch;
   }catch(e){}
   if(window._pre){document.getElementById('e-order').value=window._pre;fillLabel();window._pre=null}
@@ -1156,8 +1165,9 @@ function labelBlob(){
   if(!(sz[0]>=30&&sz[0]<=210&&sz[1]>=25&&sz[1]<=300))return toast('Tamanho inválido (largura 30–210 mm, altura 25–300 mm).'),null;
   var doc=maskDoc(val('e-doc')),docTypeLabel=docType(doc);
   var weight=String(val('e-weight')||'').trim().replace(/\s+/g,' ').slice(0,12);
-  try{localStorage.setItem('lbl-size',val('e-size'));localStorage.setItem('lbl-from',val('e-from'));localStorage.setItem('lbl-w',val('e-w'));localStorage.setItem('lbl-h',val('e-h'));localStorage.setItem('lbl-weight',weight);localStorage.removeItem('lbl-doc')}catch(e){}
-  var d={sender:val('e-from')||'Imports Brasil',client:client,city:city,addr:document.getElementById('e-addr').value,num:val('e-num'),doc:doc,docType:docTypeLabel,weight:weight,date:new Date().toLocaleDateString('pt-BR')};
+  var fromDoc=maskDoc(val('e-from-doc'));
+  try{localStorage.setItem('lbl-size',val('e-size'));localStorage.setItem('lbl-from',val('e-from'));localStorage.setItem('lbl-from-doc',fromDoc);localStorage.setItem('lbl-w',val('e-w'));localStorage.setItem('lbl-h',val('e-h'));localStorage.setItem('lbl-weight',weight);localStorage.removeItem('lbl-doc')}catch(e){}
+  var d={sender:val('e-from')||'Imports Brasil',fromDoc:fromDoc,client:client,city:city,addr:document.getElementById('e-addr').value,num:val('e-num'),doc:doc,docType:docTypeLabel,weight:weight,date:new Date().toLocaleDateString('pt-BR')};
   d.sender=d.sender.toUpperCase();
   return {blob:makeLabelsPdf(d,sz[0],sz[1],vols),name:'etiquetas-'+(d.num||'envio')+'.pdf'};
 }
@@ -1184,10 +1194,11 @@ function vEtiquetas(){
   '<label style="flex:1 1 130px">Peso (opcional)<input id="e-weight" maxlength="12" placeholder="Ex.: 2,5 kg"></label>'+
   '<label style="flex:2 1 200px">Cidade / UF de destino<input id="e-city" list="cities" placeholder="Ex.: Joinville / SC"></label>'+
   '<label style="flex:1 1 100%">Endereço / observações (opcional)<textarea id="e-addr" placeholder="Rua, número, bairro, CEP, telefone…"></textarea></label>'+
-  '<label>Nº do pedido (vira código de barras)<input id="e-num" placeholder="Ex.: PED-0001"></label>'+
+  '<label>Nº da nota fiscal (vira código de barras)<input id="e-num" inputmode="numeric" placeholder="Ex.: 000123"></label>'+
   '<label>Volumes (nº de etiquetas)<input id="e-vols" type="number" min="1" max="99" value="1"></label>'+
   '<label>Tamanho da etiqueta<select id="e-size" onchange="sizeChange()">'+sizes+'</select></label>'+
   '<label style="flex:2 1 200px">Remetente<input id="e-from" value="Imports Brasil"></label>'+
+  '<label style="flex:2 1 200px">CNPJ do remetente (Imports Brasil)<input id="e-from-doc" maxlength="18" inputmode="numeric" placeholder="Só os números" oninput="maskOnly(this)"></label>'+
   '<div id="e-custom" class="row" style="display:none;flex:1 1 100%"><label>Largura (mm)<input id="e-w" type="number" min="30" max="210" value="100"></label><label>Altura (mm)<input id="e-h" type="number" min="25" max="300" value="150"></label></div>'+
   '</div><div class="row" style="margin-top:12px"><button class="btn" onclick="openLabels()">Abrir PDF para imprimir</button><button class="btn ghost" onclick="downloadLabels()">Baixar PDF</button></div>'+
   '<p style="color:var(--muted);font-size:13px;margin:10px 0 0">Na janela de impressão, escolha a impressora térmica, tamanho de papel igual ao da etiqueta e escala 100% (sem "ajustar à página").</p></div>';

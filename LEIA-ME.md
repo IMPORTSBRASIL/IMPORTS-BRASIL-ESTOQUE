@@ -129,7 +129,18 @@ etiquetas e relatórios continuam iguais).
   cliente, cidade de destino, data, situação, quem lançou e a lista de itens com código e
   quantidade) pronto para salvar, imprimir ou enviar ao cliente no WhatsApp. O PDF abre em
   uma aba nova; se o celular bloquear a janela, o arquivo é baixado direto.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (2.9).
+- **Nº da nota fiscal na etiqueta:** na aba **Etiquetas**, o campo que antes pedia o número
+  do pedido agora se chama **Nº da nota fiscal (vira código de barras)**. O número digitado
+  sai impresso embaixo do código de barras com o título **NOTA FISCAL**, no lugar de
+  "PEDIDO". Ao escolher um pedido, o destinatário e a cidade continuam preenchendo sozinhos;
+  o número da nota fiscal é digitado por você (o campo é limpo ao trocar de pedido, para não
+  sair a nota errada na etiqueta).
+- **CNPJ do remetente na etiqueta:** na aba **Etiquetas**, embaixo do campo **Remetente**
+  apareceu **CNPJ do remetente (Imports Brasil)**. Digite só os números — o programa põe os
+  pontos, a barra e o traço sozinho — e o CNPJ sai impresso na faixa escura do topo da
+  etiqueta, logo abaixo de **IMPORTS BRASIL**. O valor fica guardado no aparelho para as
+  próximas etiquetas; se deixar em branco, a etiqueta continua como antes.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (3.1).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
