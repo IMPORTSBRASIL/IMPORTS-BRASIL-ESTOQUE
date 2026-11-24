@@ -24,6 +24,8 @@ Arquivos:
 
 ## 3) Colar as regras de segurança
 Firestore Database > aba **Regras** > apague tudo, cole o conteúdo de `firestore.rules` > **Publicar**.
+> **Importante:** sempre que atualizar o sistema, publique este arquivo de regras de novo.
+> O **chat** e a **lista de usuários** só funcionam com as regras novas (versão 4.0 do arquivo).
 
 ## 4) Conectar o site ao seu projeto
 1. Engrenagem (Configurações do projeto) > **Geral** > "Seus apps" > ícone **</>** (Web) > apelido `estoque` > Registrar app.
@@ -71,11 +73,23 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 Interface refeita, sem mudar nenhuma função do sistema (login, estoque, pedidos, histórico,
 etiquetas e relatórios continuam iguais).
 
+- **Chat entre usuários:** no topo da tela, ao lado da calculadora, há um ícone de
+  **balão de conversa**. Ele abre uma janela de chat com a lista dos outros usuários do
+  sistema; toque em um nome para conversar com ele em tempo real (as mensagens aparecem na
+  hora para os dois). Cada conversa é privada: só você e a outra pessoa veem. **As mensagens
+  ficam salvas por 3 dias** e depois são apagadas automaticamente — o próprio sistema limpa
+  as antigas, e o que passou de 3 dias deixa de aparecer. Para o chat funcionar, é preciso
+  publicar as regras novas do Firestore (passo 3).
 - **Feita para o celular:** as tabelas de Estoque, Histórico e Relatório viram cartões
   empilhados, com os nomes dos campos ao lado de cada valor — nada mais de arrastar a
   tabela para o lado nem texto cortado.
 - **Campos e botões maiores**, do tamanho certo para o dedo, e teclado que não dá zoom
   automático no iPhone.
+- **Aviso de pedidos mexidos por outro usuário:** quando alguém cria, atende, cancela ou
+  exclui um pedido, aparece uma faixa amarela no topo da tela, em qualquer aba, dizendo o
+  que mudou (ex.: “Novo pedido de Ana (PED-0016). A lista já foi atualizada.”). A lista se
+  atualiza sozinha; a faixa tem os botões **Ver pedidos** e **Fechar** e desaparece quando
+  você abre a aba Pedidos. Mudanças feitas por você mesmo não geram aviso.
 - **Menu de abas em pílulas**, sempre rolando até a aba aberta.
 - **Visual mais moderno:** cabeçalho com logotipo, cartões arredondados, sombras suaves,
   cor da marca mais viva, tela de login nova e avisos flutuantes.
@@ -124,6 +138,8 @@ etiquetas e relatórios continuam iguais).
 - **Ícone e nome ao instalar no celular:** quando o site é adicionado à tela inicial
   (Android: "Instalar app" / iPhone: "Adicionar à Tela de Início"), o atalho agora usa a
   **logo da empresa** como ícone e aparece com o nome **IMPORTS BRASIL**.
+- **Logo no PDF do pedido:** o **Pedido em PDF** sai com a **logo da Imports Brasil** no
+  topo, à esquerda, na faixa preta do cabeçalho — o documento fica com a cara da empresa.
 - **Pedido em PDF:** cada pedido criado na aba **Pedidos** agora tem o botão
   **Pedido em PDF**. Ele gera o documento do pedido (com o nome da empresa no topo, número,
   cliente, cidade de destino, data, situação, quem lançou e a lista de itens com código e
@@ -166,9 +182,20 @@ etiquetas e relatórios continuam iguais).
   tirar), usar **Remover**, adicionar itens do estoque e itens fora do estoque. Pedidos já
   **Atendidos** aceitam só a correção de cliente e cidade (os itens não mudam porque o estoque
   já foi descontado), e pedidos cancelados não são editáveis. **Excluir** funciona para
-  qualquer pedido: nos atendidos, aparece um aviso de que as unidades não voltam para o
-  estoque. A exclusão é definitiva e pede confirmação.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (3.5).
+  qualquer pedido. Ao excluir um pedido **Atendido**, as unidades dos itens do estoque
+  **voltam automaticamente** para o estoque, e o programa registra uma **Entrada** no
+  histórico de movimentações com a observação **Estorno do pedido PED-XXXX**. Itens fora do
+  estoque e pedidos avulsos não mexem no estoque. A exclusão é definitiva e pede confirmação.
+- **Peso e volume no pedido:** dentro de **Novo pedido** (aba Pedidos) apareceram os campos
+  **Peso (opcional)** e **Volume (opcional)**. Pode digitar livremente, por exemplo `2,5 kg`
+  e `3 caixas` ou `0,12 m³`. O peso e o volume aparecem na lista de pedidos, saem no
+  **Pedido em PDF** (campos **PESO** e **VOLUME**) e podem ser corrigidos depois pelo botão
+  **Editar pedido** — inclusive em pedidos já **Atendidos**, porque essas informações não
+  mexem no estoque. Pedidos antigos, criados antes desta versão, também aceitam o
+  preenchimento. Ao escolher um pedido na aba **Etiquetas**, o peso do pedido preenche
+  sozinho o campo **Peso** da etiqueta (dá para ajustar na hora). O **Hist. pedidos** também
+  encontra pedidos pelo peso e pelo volume digitados.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.1).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
