@@ -25,7 +25,7 @@ Arquivos:
 ## 3) Colar as regras de segurança
 Firestore Database > aba **Regras** > apague tudo, cole o conteúdo de `firestore.rules` > **Publicar**.
 > **Importante:** sempre que atualizar o sistema, publique este arquivo de regras de novo.
-> O **chat** e a **lista de usuários** só funcionam com as regras novas (versão 4.0 do arquivo).
+> A **lista de usuários** só funciona com as regras novas (versão 4.0 do arquivo).
 
 ## 4) Conectar o site ao seu projeto
 1. Engrenagem (Configurações do projeto) > **Geral** > "Seus apps" > ícone **</>** (Web) > apelido `estoque` > Registrar app.
@@ -73,13 +73,6 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 Interface refeita, sem mudar nenhuma função do sistema (login, estoque, pedidos, histórico,
 etiquetas e relatórios continuam iguais).
 
-- **Chat entre usuários:** no topo da tela, ao lado da calculadora, há um ícone de
-  **balão de conversa**. Ele abre uma janela de chat com a lista dos outros usuários do
-  sistema; toque em um nome para conversar com ele em tempo real (as mensagens aparecem na
-  hora para os dois). Cada conversa é privada: só você e a outra pessoa veem. **As mensagens
-  ficam salvas por 3 dias** e depois são apagadas automaticamente — o próprio sistema limpa
-  as antigas, e o que passou de 3 dias deixa de aparecer. Para o chat funcionar, é preciso
-  publicar as regras novas do Firestore (passo 3).
 - **Feita para o celular:** as tabelas de Estoque, Histórico e Relatório viram cartões
   empilhados, com os nomes dos campos ao lado de cada valor — nada mais de arrastar a
   tabela para o lado nem texto cortado.
@@ -102,8 +95,6 @@ etiquetas e relatórios continuam iguais).
   no celular. Ao usar a busca, a lista abre sozinha.
 - **Etiquetas:** novo campo **CPF / CNPJ (opcional)**. Se preenchido, sai impresso na etiqueta
   abaixo do nome do destinatário; o valor fica guardado no aparelho para a próxima etiqueta.
-- **Calculadora:** ícone no canto superior direito abre uma calculadora em popup (somar,
-  subtrair, multiplicar e dividir) para conferir valores sem sair da tela.
 - **Soma por produto:** na aba Estoque, um cartão **Soma por produto** agrupa automaticamente
   os produtos que têm o mesmo nome e mostra o total somado — por exemplo, babydoll em P, M e G
   aparece como um grupo só, com a soma e a quantidade de cada tamanho. O grupo mostra ainda
@@ -195,7 +186,26 @@ etiquetas e relatórios continuam iguais).
   preenchimento. Ao escolher um pedido na aba **Etiquetas**, o peso do pedido preenche
   sozinho o campo **Peso** da etiqueta (dá para ajustar na hora). O **Hist. pedidos** também
   encontra pedidos pelo peso e pelo volume digitados.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.1).
+- **Novo pedido mais direto:** o campo **Cliente** saiu do formulário. No lugar dele ficou o
+  campo **Pedido feito por**, para anotar o nome de quem fez o pedido, e o campo de destino
+  passou a se chamar **Cidade de destino e cliente** — ali você escreve o nome do cliente e a
+  cidade juntos, por exemplo `Ana - Joinville / SC`. O nome continua saindo no **Pedido em
+  PDF**, no **Hist. pedidos** e na **Etiqueta de envio**: ao escolher o pedido, o programa
+  separa o nome antes do hífen (ou da vírgula) como destinatário e o restante como cidade,
+  e você pode corrigir os dois campos na hora. O **Pedido em PDF** também passou a mostrar
+  **PEDIDO FEITO POR**.
+- **Chat e calculadora removidos:** os dois ícones do canto superior direito saíram, junto
+  com as janelas de chat e calculadora. A tela ficou mais limpa — o resto do sistema não mudou.
+- **Foto da nota fiscal preenche a etiqueta:** na aba **Etiquetas** apareceu o botão
+  **Anexar foto da nota fiscal**. Tire uma foto da DANFE (ou escolha uma da galeria) e o
+  programa lê o texto da imagem e preenche sozinho o **Destinatário**, o **CPF/CNPJ**, a
+  **Cidade / UF**, o **Endereço** (com bairro e CEP), o **Nº da nota fiscal** (tirado da
+  chave de acesso) e o **Peso** (peso bruto). O texto lido aparece em “Texto que o programa
+  leu na foto”, para você conferir. **Sempre olhe os campos antes de imprimir** — foto
+  tremida, escura ou torta pode fazer o programa errar. Na primeira vez o programa baixa
+  um leitor de texto (~15 MB) e por isso precisa de internet; depois fica mais rápido.
+  A foto não é enviada para lugar nenhum: a leitura acontece no próprio celular/computador.
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.3).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

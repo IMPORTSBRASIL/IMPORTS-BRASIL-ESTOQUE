@@ -119,59 +119,12 @@ small{font-size:12.5px}
 .gsizes li{font-size:12px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .gsizes li b{font-weight:700;color:var(--ink)}
 
-/* ---------- calculadora ---------- */
-.calcpop{
-  position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));z-index:40;
-  width:min(300px,calc(100vw - 28px));padding:14px;display:none;background:var(--surface);
-  border:1px solid var(--line-strong);border-radius:var(--r-lg);box-shadow:0 18px 44px rgba(15,42,54,.22);
-}
-.calcpop.on{display:block}
-/* ---------- chat entre usuários ---------- */
-.chatpop{
-  position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));z-index:41;
-  width:min(380px,calc(100vw - 28px));height:min(560px,calc(100vh - 96px));display:none;background:var(--surface);
-  border:1px solid var(--line-strong);border-radius:var(--r-lg);box-shadow:0 18px 44px rgba(15,42,54,.28);overflow:hidden;
-}
-.chatpop.on{display:flex;flex-direction:column}
-.chat-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex:0 0 auto}
-.chat-head strong{font-size:14px}
-.chat-head .chat-note{font-size:11px;color:var(--muted);flex:1;text-align:right}
-.chat-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
-.chat-empty{color:var(--muted);font-size:13px;margin:8px 0}
-.chat-user{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;cursor:pointer;background:var(--surface-soft);border:1px solid var(--line);border-radius:12px;padding:9px 10px;color:var(--ink)}
-.chat-user:hover{border-color:var(--line-strong)}
-.chat-av{width:32px;height:32px;border-radius:50%;background:var(--accent,#0b6b6b);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto}
-.chat-uinfo{flex:1;min-width:0}
-.chat-uinfo b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-uinfo small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-uinfo em{font-style:normal;font-size:11px;color:var(--muted);flex:0 0 auto}
-.chat-msg{display:flex;flex-direction:column;align-items:flex-start;max-width:100%}
-.chat-msg.mine{align-items:flex-end}
-.chat-bubble{background:var(--surface-soft);border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:13.5px;line-height:1.35;white-space:pre-wrap;word-break:break-word;max-width:85%}
-.chat-msg.mine .chat-bubble{background:var(--accent,#0b6b6b);border-color:transparent;color:#fff}
-.chat-time{font-size:10.5px;color:var(--muted);margin-top:2px}
-.chat-form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);flex:0 0 auto}
-.chat-form input{flex:1;min-width:0}
-@media(max-width:520px){.chatpop{height:calc(100vh - 84px)}}
-.calc-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.calc-head strong{font-size:14px}
-.calc-sub{min-height:16px;text-align:right;font-size:12px;color:var(--muted);margin-top:8px;font-variant-numeric:tabular-nums}
-.calc-out{
-  text-align:right;font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1.25;
-  padding:2px 2px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums;
-}
-.calc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.calc-grid button{
-  font:inherit;font-size:16px;font-weight:600;min-height:46px;cursor:pointer;
-  border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);color:var(--ink);
-  transition:background .14s,transform .1s;
-}
-.calc-grid button:hover{background:var(--surface-2)}
-.calc-grid button:active{transform:scale(.96)}
-.calc-grid button.op{background:var(--brand-soft);color:var(--accent);border-color:color-mix(in srgb,var(--brand) 35%,var(--line))}
-.calc-grid button.eq{background:linear-gradient(140deg,var(--brand-2),var(--brand));color:#fff;border-color:transparent;grid-row:span 2;min-height:0}
-.calc-grid button.w2{grid-column:span 2}
-:root[data-theme="dark"] .calc-grid button.eq{color:#04161c}
+/* ---------- foto da nota fiscal (etiquetas) ---------- */
+.nfrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 6px}
+.nfrow small{color:var(--muted);font-size:12.5px;line-height:1.4;flex:1 1 260px;min-width:0}
+.nftext{margin:10px 0 0;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-soft);padding:8px 10px}
+.nftext summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+.nftext pre{margin:8px 0 0;max-height:180px;overflow:auto;font-size:11.5px;line-height:1.45;white-space:pre-wrap;color:var(--ink-soft)}
 
 /* ---------- navegação ---------- */
 .navwrap{
@@ -443,7 +396,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   .t-resumo th:nth-child(2),.t-resumo td:nth-child(2){width:46%}
   .t-resumo th:nth-child(3),.t-resumo td:nth-child(3),.t-resumo th:nth-child(4),.t-resumo td:nth-child(4){width:9%}
   .t-resumo th:nth-child(5),.t-resumo td:nth-child(5){width:16%}
-  .modal,.calcpop,.chatpop{display:none!important}
+  .modal{display:none!important}
 }
 </style>
 </head>
@@ -461,32 +414,17 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.1</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.3</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <div class="top">
   <div class="brand"><img class="brandlogo" src="logo.png" alt="IMPORTS BRASIL" width="44" height="44"><div><h1>IMPORTS BRASIL</h1><small>Controle de estoque</small></div></div>
-  <div class="who"><span class="chip" id="who"></span><button class="btn ghost sm" onclick="logout()">Sair</button><button class="iconbtn" id="chat-btn" onclick="toggleChat()" aria-haspopup="dialog" aria-expanded="false" aria-label="Abrir chat com outros usuários" title="Chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H8l-4 3v-5.5A8 8 0 0 1 13 4a8 8 0 0 1 8 8z"/><path d="M9 11h.01M13 11h.01M17 11h.01"/></svg></button><button class="iconbtn" id="calc-btn" onclick="toggleCalc()" aria-haspopup="dialog" aria-expanded="false" aria-label="Abrir calculadora" title="Calculadora"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 6.5h8"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></button></div>
+  <div class="who"><span class="chip" id="who"></span><button class="btn ghost sm" onclick="logout()">Sair</button></div>
 </div>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="syncbar" class="syncbar" role="status" aria-live="polite" hidden></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.1</strong></span></footer>
-<div id="chat-pop" class="chatpop" role="dialog" aria-label="Chat entre usuários"></div>
-<div id="calc" class="calcpop" role="dialog" aria-label="Calculadora">
-<div class="calc-head"><strong>Calculadora</strong><button class="btn ghost sm" onclick="toggleCalc(false)">Fechar</button></div>
-<div class="calc-sub" id="calc-sub">&nbsp;</div>
-<div class="calc-out" id="calc-out">0</div>
-<div class="calc-grid">
-<button onclick="calcClear()" aria-label="Limpar">C</button>
-<button onclick="calcBack()" aria-label="Apagar último dígito">⌫</button>
-<button class="op" onclick="calcOp('÷')" aria-label="Dividir">÷</button>
-<button class="op" onclick="calcOp('×')" aria-label="Multiplicar">×</button>
-<button onclick="calcNum('7')">7</button><button onclick="calcNum('8')">8</button><button onclick="calcNum('9')">9</button><button class="op" onclick="calcOp('−')" aria-label="Subtrair">−</button>
-<button onclick="calcNum('4')">4</button><button onclick="calcNum('5')">5</button><button onclick="calcNum('6')">6</button><button class="op" onclick="calcOp('+')" aria-label="Somar">+</button>
-<button onclick="calcNum('1')">1</button><button onclick="calcNum('2')">2</button><button onclick="calcNum('3')">3</button><button class="eq" onclick="calcEq()" aria-label="Igual">=</button>
-<button class="w2" onclick="calcNum('0')">0</button><button onclick="calcDot()" aria-label="Vírgula decimal">,</button>
-</div></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.3</strong></span></footer>
 </div>
 </main>
 <div id="modal" class="modal" style="display:none" onclick="if(event.target===this)closeEdit()"><div class="card box" role="dialog" aria-modal="true" aria-label="Editar produto">
@@ -557,7 +495,7 @@ function validInventoryData(data){
         (p.notes===undefined||typeof p.notes==='string');
     })&&
     Array.isArray(data.orders)&&data.orders.every(function(o){
-      return o&&typeof o==='object'&&safeId(o.id)&&safeId(o.num)&&typeof o.client==='string'&&(o.city===undefined||typeof o.city==='string')&&
+      return o&&typeof o==='object'&&safeId(o.id)&&safeId(o.num)&&(o.client===undefined||typeof o.client==='string')&&(o.madeBy===undefined||typeof o.madeBy==='string')&&(o.city===undefined||typeof o.city==='string')&&
         typeof o.date==='number'&&Number.isFinite(o.date)&&
         (o.status==='Pendente'||o.status==='Atendido'||o.status==='Cancelado')&&
         Array.isArray(o.items)&&o.items.every(function(i){
@@ -711,9 +649,9 @@ function addFreeDraft(){
 }
 function rmDraft(i){draft.splice(i,1);render(true)}
 async function saveOrder(){
-  var client=val('o-client'),city=val('o-city'),weight=val('o-weight').trim(),volume=val('o-volume').trim();
-  if(!client)return toast('Informe o cliente.');
-  if(!city)return toast('Informe a cidade de destino do pedido.');
+  var made=val('o-made'),city=val('o-city'),weight=val('o-weight').trim(),volume=val('o-volume').trim();
+  if(!made)return toast('Informe quem fez o pedido.');
+  if(!city)return toast('Informe a cidade de destino e o cliente.');
   if(!draft.length)return toast('Adicione ao menos um item.');
   var num;window._skipNotice=Date.now()+8000;
   try{
@@ -722,9 +660,9 @@ async function saveOrder(){
       var n=(c.exists&&c.data().seq)||S.seq||1;
       num='PED-'+pad(n);
       t.set(cref,{seq:n+1},{merge:true});
-      t.set(db.collection('orders').doc(uid()),{num:num,client:client,city:city,weight:weight,volume:volume,date:Date.now(),status:'Pendente',items:clean(draft),by:user.email});
+      t.set(db.collection('orders').doc(uid()),{num:num,madeBy:made,city:city,weight:weight,volume:volume,date:Date.now(),status:'Pendente',items:clean(draft),by:user.email});
     });
-    draft=[];window._cl='';window._city='';window._oWeight='';window._oVolume='';window._oFree='';window._oFsize='';toast('Pedido '+num+' criado.');render();
+    draft=[];window._made='';window._city='';window._oWeight='';window._oVolume='';window._oFree='';window._oFsize='';toast('Pedido '+num+' criado.');render();
   }catch(e){fail(e)}
 }
 async function fulfill(id){
@@ -772,7 +710,7 @@ async function delOrder(id){
   var o=S.orders.find(function(x){return x.id===id});
   if(!o)return toast('Pedido não encontrado.');
   var aviso=o.status==='Atendido'?(o.avulso?'\n\nEste pedido é avulso (itens fora do estoque), então nada muda no estoque.':'\n\nEste pedido já foi atendido: as unidades dos itens do estoque VOLTAM automaticamente para o estoque.'):'';
-  if(!confirm('Excluir definitivamente o pedido '+o.num+' ('+o.client+')?'+aviso+'\n\nEsta ação não pode ser desfeita.'))return;
+  if(!confirm('Excluir definitivamente o pedido '+o.num+' ('+(o.client||o.city||'')+')?'+aviso+'\n\nEsta ação não pode ser desfeita.'))return;
   window._skipNotice=Date.now()+8000;
   try{
     var msg='Pedido '+o.num+' excluído.';
@@ -808,7 +746,7 @@ function editOrder(id){
   var o=S.orders.find(function(x){return x.id===id});
   if(!o)return toast('Pedido não encontrado.');
   if(o.status==='Cancelado')return toast('Pedido cancelado não pode ser editado.');
-  window._oe=id;window._oeCl=o.client;window._oeCity=o.city||'';
+  window._oe=id;window._oeMade=o.madeBy||'';window._oeCl=o.client||'';window._oeCity=o.city||'';
   window._oeW=o.weight||'';window._oeV=o.volume||'';
   window._oeF='';window._oeFsize='';
   oeItems=o.items.map(function(i){return i.name?{pid:i.pid,name:i.name,qty:i.qty}:{pid:i.pid,qty:i.qty}});
@@ -826,8 +764,9 @@ function oeBox(){
   }).join('');
   var html='<div class="listhead" style="margin:0 0 6px"><h2 style="margin:0">Editar pedido '+esc(o.num)+'</h2><button class="btn ghost sm" onclick="closeOrderEdit()">Fechar</button></div>'+
     '<p class="report-subtitle" style="margin:0 0 10px">Status: <strong>'+o.status+'</strong>'+(o.avulso?' · pedido avulso':'')+'</p>'+
-    '<div class="row"><label style="flex:2 1 220px">Cliente<input id="oe-client" value="'+esc(window._oeCl||'')+'" oninput="window._oeCl=this.value"></label>'+
-    '<label style="flex:1 1 180px">Cidade de destino<input id="oe-city" value="'+esc(window._oeCity||'')+'" oninput="window._oeCity=this.value"></label></div>'+
+    '<div class="row"><label style="flex:1 1 160px">Pedido feito por<input id="oe-made" maxlength="60" value="'+esc(window._oeMade||'')+'" oninput="window._oeMade=this.value"></label>'+
+    '<label style="flex:1 1 160px">Cliente<input id="oe-client" value="'+esc(window._oeCl||'')+'" oninput="window._oeCl=this.value"></label>'+
+    '<label style="flex:1 1 180px">Cidade de destino e cliente<input id="oe-city" value="'+esc(window._oeCity||'')+'" oninput="window._oeCity=this.value"></label></div>'+
     '<div class="row"><label style="flex:1 1 150px">Peso (opcional)<input id="oe-weight" maxlength="20" placeholder="Ex.: 2,5 kg" value="'+esc(window._oeW||'')+'" oninput="window._oeW=this.value"></label>'+
     '<label style="flex:1 1 150px">Volume (opcional)<input id="oe-volume" maxlength="20" placeholder="Ex.: 3 caixas ou 0,12 m³" value="'+esc(window._oeV||'')+'" oninput="window._oeV=this.value"></label></div>'+
     '<h3 style="margin:16px 0 6px;font-size:15px">Itens</h3>'+
@@ -865,9 +804,9 @@ async function saveOrderEdit(){
   var id=window._oe;if(!id)return;
   var o=S.orders.find(function(x){return x.id===id});
   if(!o)return toast('Pedido não encontrado.');
-  var client=val('oe-client'),city=val('oe-city'),weight=val('oe-weight').trim(),volume=val('oe-volume').trim();
-  if(!client)return toast('Informe o cliente.');
-  if(!city)return toast('Informe a cidade de destino do pedido.');
+  var made=val('oe-made'),client=val('oe-client'),city=val('oe-city'),weight=val('oe-weight').trim(),volume=val('oe-volume').trim();
+  if(!made&&!client)return toast('Informe quem fez o pedido ou o cliente.');
+  if(!city)return toast('Informe a cidade de destino e o cliente.');
   var editable=o.status==='Pendente';
   var items=editable?oeItems.filter(function(i){return i.qty>0}).map(function(i){return i.name?{pid:i.pid,name:i.name,qty:i.qty}:{pid:i.pid,qty:i.qty}}):clean(o.items);
   if(!items.length)return toast('Adicione ao menos um item.');
@@ -877,7 +816,7 @@ async function saveOrderEdit(){
       var ref=db.collection('orders').doc(id),d=await t.get(ref);
       if(!d.exists)throw new Error('Este pedido já foi excluído.');
       if(editable&&d.data().status!=='Pendente')throw new Error('Este pedido já foi '+String(d.data().status).toLowerCase()+' por outro usuário. Os itens não foram alterados.');
-      t.update(ref,{client:client,city:city,weight:weight,volume:volume,items:items});
+      t.update(ref,{madeBy:made,client:client,city:city,weight:weight,volume:volume,items:items});
     });
     toast('Pedido '+o.num+' atualizado.');
     closeOrderEdit();render();
@@ -989,190 +928,6 @@ function vGrupos(){
   '<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Produtos com o mesmo nome entram no mesmo grupo e são somados, mesmo cadastrados em tamanhos ou códigos diferentes.</p>'+
   '<div id="group-list"'+(open?'':' hidden')+'><ul class="groups">'+rows+'</ul></div></div>';
 }
-
-/* ---------- calculadora (popup) ---------- */
-var CALC={cur:'0',prev:null,op:null,fresh:true};
-function fmtNum(n){var s=String(Math.round(n*1e10)/1e10);return s.replace('.',',')}
-function calcRender(){
-  var o=document.getElementById('calc-out');if(!o)return;
-  o.textContent=CALC.cur;
-  var s=document.getElementById('calc-sub');
-  if(s)s.textContent=CALC.op!=null?(fmtNum(CALC.prev)+' '+CALC.op):'\u00a0';
-}
-function calcNum(d){
-  if(CALC.fresh||CALC.cur==='0'){CALC.cur=d;CALC.fresh=false}
-  else if(CALC.cur.replace(/[^0-9]/g,'').length<12)CALC.cur+=d;
-  calcRender();
-}
-function calcDot(){
-  if(CALC.fresh){CALC.cur='0,';CALC.fresh=false}
-  else if(CALC.cur.indexOf(',')<0)CALC.cur+=',';
-  calcRender();
-}
-function calcBack(){
-  if(CALC.fresh)return;
-  CALC.cur=CALC.cur.length>1?CALC.cur.slice(0,-1):'0';
-  calcRender();
-}
-function calcClear(){
-  CALC={cur:'0',prev:null,op:null,fresh:true};calcRender();
-}
-function calcDo(a,b,op){
-  if(op==='+')return a+b;
-  if(op==='−')return a-b;
-  if(op==='×')return a*b;
-  if(op==='÷')return b===0?0:a/b;
-  return b;
-}
-function calcVal(){return parseFloat(CALC.cur.replace(',','.'))||0}
-function calcOp(op){
-  var v=calcVal();
-  if(CALC.op!=null&&!CALC.fresh)v=calcDo(CALC.prev,v,CALC.op);
-  CALC.prev=v;CALC.op=op;CALC.cur=fmtNum(v);CALC.fresh=true;calcRender();
-}
-function calcEq(){
-  if(CALC.op==null)return;
-  var v=calcDo(CALC.prev,calcVal(),CALC.op);
-  CALC.cur=fmtNum(v);CALC.prev=null;CALC.op=null;CALC.fresh=true;calcRender();
-}
-function toggleCalc(force){
-  var el=document.getElementById('calc');if(!el)return;
-  var on=typeof force==='boolean'?force:!el.classList.contains('on');
-  if(on)toggleChat(false);
-  el.classList.toggle('on',on);
-  var b=document.getElementById('calc-btn');
-  if(b)b.setAttribute('aria-expanded',on?'true':'false');
-  if(on)calcRender();
-}
-document.addEventListener('click',function(e){
-  var el=document.getElementById('calc');
-  if(!el||!el.classList.contains('on'))return;
-  if(el.contains(e.target)||e.target.closest('#calc-btn'))return;
-  toggleCalc(false);
-});
-document.addEventListener('keydown',function(e){
-  var el=document.getElementById('calc');
-  if(e.key==='Escape'&&el&&el.classList.contains('on'))toggleCalc(false);
-});
-
-/* ---------- chat entre usuários (mensagens apagadas após 3 dias) ---------- */
-var CHAT_MS=3*24*60*60*1000,chatWith=null,chatDocs=[],chatUnsub=null,chatOpen=false,chatShellFor=null;
-function chatMe(){return user&&user.email||''}
-function chatCut(){return Date.now()-CHAT_MS}
-function chatTime(n){try{return new Date(n).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
-function chatSubscribe(){
-  if(chatUnsub||!db||!user)return;
-  chatUnsub=db.collection('chat').where('members','array-contains',user.email).limit(500).onSnapshot(function(s){
-    var cut=chatCut(),exp=[];
-    chatDocs=s.docs.map(function(d){return Object.assign({},d.data(),{id:d.id})});
-    chatDocs.forEach(function(m){if(m.date<cut)exp.push(m)});
-    exp.forEach(function(m){db.collection('chat').doc(m.id).delete().catch(function(){})});
-    if(chatOpen)chatPaint();
-  },function(e){fail(e)});
-}
-function chatStop(){if(chatUnsub){chatUnsub();chatUnsub=null}chatDocs=[];chatWith=null;chatOpen=false;chatShellFor=null}
-function toggleChat(force){
-  var el=document.getElementById('chat-pop');if(!el)return;
-  var on=typeof force==='boolean'?force:!el.classList.contains('on');
-  if(on)toggleCalc(false);
-  chatOpen=on;
-  el.classList.toggle('on',on);
-  var b=document.getElementById('chat-btn');
-  if(b)b.setAttribute('aria-expanded',on?'true':'false');
-  if(on){chatWith=null;chatSubscribe();chatPaint();setTimeout(chatScroll,50)}
-}
-function chatScroll(){var b=document.getElementById('chat-body');if(b)b.scrollTop=b.scrollHeight}
-function chatPaint(){
-  var el=document.getElementById('chat-pop');if(!el)return;
-  if(chatWith&&chatShellFor===chatWith){
-    var box=document.getElementById('chat-body');
-    if(box){box.innerHTML=chatMsgsHtml();chatScroll();return}
-  }
-  el.innerHTML=chatWith?chatThreadHtml():chatListHtml();
-  chatShellFor=chatWith;
-  if(chatWith)setTimeout(chatScroll,30);
-}
-function chatUsers(){
-  var me=chatMe(),map={};
-  function add(email,lastSeen){
-    if(!email||email===me)return;
-    if(!map[email])map[email]={email:email,lastSeen:lastSeen||0,lastDate:0,lastText:'',lastFrom:''};
-    else if(lastSeen&&lastSeen>map[email].lastSeen)map[email].lastSeen=lastSeen;
-  }
-  (S.users||[]).forEach(function(u){add(u.email,u.lastSeen)});
-  (S.orders||[]).forEach(function(o){add(o.by,o.date)});
-  (S.moves||[]).forEach(function(m){add(m.by,m.date)});
-  chatDocs.forEach(function(m){
-    if(m.date<chatCut())return;
-    add(m.from);add(m.to);
-    [m.from,m.to].forEach(function(e){
-      var u=map[e];if(!u)return;
-      if(m.date>=u.lastDate){u.lastDate=m.date;u.lastText=m.text;u.lastFrom=m.from}
-    });
-  });
-  return Object.keys(map).map(function(k){return map[k]}).sort(function(a,b){
-    if(b.lastDate!==a.lastDate)return b.lastDate-a.lastDate;
-    return a.email.localeCompare(b.email,'pt-BR');
-  });
-}
-function chatListHtml(){
-  var us=chatUsers();
-  var rows=us.length?us.map(function(u){
-    var prev=u.lastDate?(u.lastFrom===chatMe()?'Você: ':'')+u.lastText:'Sem mensagens ainda';
-    return '<button class="chat-user" onclick="chatOpenWith(\''+esc(u.email).replace(/'/g,'&#39;')+'\')">'+
-      '<span class="chat-av">'+esc((u.email||'?').charAt(0).toUpperCase())+'</span>'+
-      '<span class="chat-uinfo"><b>'+esc(u.email)+'</b><small>'+esc(prev)+'</small></span>'+
-      (u.lastDate?'<em>'+chatTime(u.lastDate)+'</em>':'')+'</button>';
-  }).join(''):'<p class="chat-empty">Nenhum outro usuário ainda. Quando alguém entrar no sistema, aparece aqui.</p>';
-  return '<div class="chat-head"><strong>Chat</strong><span class="chat-note">mensagens somem em 3 dias</span><button class="btn ghost sm" onclick="toggleChat(false)">Fechar</button></div>'+
-    '<div class="chat-body">'+rows+'</div>';
-}
-function chatThreadHtml(){
-  return '<div class="chat-head"><button class="btn ghost sm" onclick="chatBack()" aria-label="Voltar para a lista">Voltar</button>'+
-    '<strong style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(chatWith)+'</strong>'+
-    '<button class="btn ghost sm" onclick="toggleChat(false)">Fechar</button></div>'+
-    '<div class="chat-body" id="chat-body">'+chatMsgsHtml()+'</div>'+
-    '<div class="chat-form"><input id="chat-input" maxlength="1000" placeholder="Escreva uma mensagem…" aria-label="Mensagem" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();chatSend()}"><button class="btn sm" onclick="chatSend()">Enviar</button></div>';
-}
-function chatMsgsHtml(){
-  var me=chatMe(),cut=chatCut();
-  var list=chatDocs.filter(function(m){
-    if(m.date<cut)return false;
-    return (m.from===chatWith&&m.to===me)||(m.from===me&&m.to===chatWith);
-  }).sort(function(a,b){return a.date-b.date});
-  if(!list.length)return '<p class="chat-empty">Nenhuma mensagem ainda. Escreva a primeira!</p>';
-  return list.map(function(m){
-    var mine=m.from===me;
-    return '<div class="chat-msg'+(mine?' mine':'')+'"><div class="chat-bubble">'+esc(m.text)+'</div><span class="chat-time">'+chatTime(m.date)+'</span></div>';
-  }).join('');
-}
-function chatOpenWith(email){
-  chatWith=email||null;chatPaint();
-  setTimeout(function(){var i=document.getElementById('chat-input');if(i)i.focus()},60);
-}
-function chatBack(){chatWith=null;chatShellFor=null;chatPaint()}
-async function chatSend(){
-  var me=chatMe();if(!me||!chatWith)return;
-  var input=document.getElementById('chat-input'),text=input?String(input.value||'').trim():'';
-  if(!text)return;
-  var members=[me,chatWith].sort();
-  if(members[0]===members[1])return toast('Escolha outro usuário para conversar.');
-  try{
-    await db.collection('chat').add({members:members,from:me,to:chatWith,text:text.slice(0,1000),date:Date.now()});
-    if(input){input.value='';input.focus()}
-  }catch(e){fail(e)}
-}
-document.addEventListener('click',function(e){
-  var el=document.getElementById('chat-pop');
-  if(!el||!el.classList.contains('on'))return;
-  if(el.contains(e.target)||e.target.closest('#chat-btn'))return;
-  toggleChat(false);
-});
-document.addEventListener('keydown',function(e){
-  if(e.key!=='Escape')return;
-  var el=document.getElementById('chat-pop');
-  if(el&&el.classList.contains('on'))toggleChat(false);
-});
 
 /* ---------- Etiquetas de envio (PDF gerado no próprio navegador) ---------- */
 var HW={"r":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,556,556,333,556,537,278,333,556,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"b":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,556,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,556,556,333,611,556,278,333,556,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
@@ -1367,10 +1122,12 @@ function buildOrderPdf(o){
   }
   function info(){
     var cw=(W-2*M-g)/2,x2=M+cw+g;
-    y+=Math.max(field(M,'CLIENTE',o.client,12,cw),field(x2,'CIDADE DE DESTINO',o.city,12,cw))+g*0.4;
+    if(o.client)y+=Math.max(field(M,'CLIENTE',o.client,12,cw),field(x2,'CIDADE DE DESTINO',o.city,12,cw))+g*0.4;
+    else y+=field(M,'CLIENTE / CIDADE DE DESTINO',o.city,12,W-2*M)+g*0.4;
     y+=Math.max(field(M,'DATA DO PEDIDO',new Date(o.date).toLocaleDateString('pt-BR'),10,cw),field(x2,'SITUAÇÃO',statusTxt,10,cw))+g*0.4;
     if(o.weight&&o.volume)y+=Math.max(field(M,'PESO',o.weight,10,cw),field(x2,'VOLUME',o.volume,10,cw))+g*0.4;
     else if(o.weight||o.volume)y+=field(M,o.weight?'PESO':'VOLUME',o.weight||o.volume,10,cw)+g*0.4;
+    if(o.madeBy)y+=field(M,'PEDIDO FEITO POR',o.madeBy,10,cw)+g*0.4;
     if(o.by)y+=field(M,'CRIADO POR',o.by,9,cw)+g*0.4;
     pg.hline(M,W-M,y+4,0.8);y+=g+8;
   }
@@ -1449,13 +1206,172 @@ function maskOnly(el){
   var m=maskDoc(el.value);el.value=m;
   try{el.setSelectionRange(m.length,m.length)}catch(e){}
 }
+function destPair(o){
+  if(o.client)return {client:o.client,city:o.city||''};
+  var t=String(o.city||'').trim(),m=t.split(/\s+[-–—]\s+|,\s+/);
+  if(m.length>1)return {client:m[0].trim(),city:m.slice(1).join(', ').trim()};
+  return {client:t,city:''};
+}
 function fillLabel(){
   var id=val('e-order'),o=S.orders.find(function(x){return x.id===id});
   if(!o)return;
-  document.getElementById('e-client').value=o.client;
-  document.getElementById('e-city').value=o.city||'';
+  var pp=destPair(o);
+  document.getElementById('e-client').value=pp.client;
+  document.getElementById('e-city').value=pp.city;
   document.getElementById('e-weight').value=o.weight||'';
   document.getElementById('e-num').value='';
+}
+/* ---------- foto da nota fiscal: lê o texto e preenche a etiqueta ---------- */
+var TESS_CDN='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+function nfStatus(msg,err){
+  var el=document.getElementById('e-nf-status');
+  if(el){el.textContent=msg;el.style.color=err?'#b42318':''}
+}
+function loadTesseract(){
+  if(window.Tesseract)return Promise.resolve(window.Tesseract);
+  if(window._tessLoad)return window._tessLoad;
+  window._tessLoad=new Promise(function(res,rej){
+    var sc=document.createElement('script');sc.src=TESS_CDN;sc.async=true;
+    sc.onload=function(){window.Tesseract?res(window.Tesseract):rej(new Error('leitor'))};
+    sc.onerror=function(){rej(new Error('internet'))};
+    (document.head||document.body).appendChild(sc);
+  });
+  return window._tessLoad;
+}
+function nfImage(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){
+      try{
+        var max=2000,k=Math.min(1,max/Math.max(img.width,img.height));
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.width*k));c.height=Math.max(1,Math.round(img.height*k));
+        var g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);
+        try{
+          var d=g.getImageData(0,0,c.width,c.height),a=d.data,i,v;
+          for(i=0;i<a.length;i+=4){
+            v=a[i]*0.299+a[i+1]*0.587+a[i+2]*0.114;
+            v=Math.max(0,Math.min(255,(v-128)*1.25+128));
+            a[i]=a[i+1]=a[i+2]=v;
+          }
+          g.putImageData(d,0,0);
+        }catch(e){}
+        URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.92));
+      }catch(e){URL.revokeObjectURL(url);rej(e)}
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);rej(new Error('imagem'))};
+    img.src=url;
+  });
+}
+function nfDigits(t){return String(t||'').replace(/\D/g,'')}
+function nfValue(txt,re,stop){
+  var m=re.exec(txt);if(!m)return '';
+  var lines=txt.slice(m.index+m[0].length).split('\n'),out='',cut=false;
+  for(var i=0;i<lines.length&&i<5;i++){
+    var ln=String(lines[i]).replace(/[ \t]+/g,' ').trim();
+    if(i===0)ln=ln.replace(/^[:\-\u2013]\s*/,'');
+    if(!ln)continue;
+    if(stop&&!cut){
+      var sm=stop.exec(ln);
+      if(sm){
+        if(sm.index>0){ln=ln.slice(0,sm.index).replace(/[\s:.\-\u2013]+$/,'');cut=true}
+        else break;
+      }
+    }
+    if(ln)out+=(out?' ':'')+ln;
+    if(cut||out.length>90)break;
+  }
+  return out.replace(/[;:.\-]+$/,'').replace(/\s+/g,' ').trim();
+}
+function parseInvoiceText(raw){
+  var out={client:'',doc:'',city:'',addr:'',num:'',weight:''};
+  var t=String(raw||'').replace(/\r/g,'').replace(/[\u00a0]/g,' ');
+  /* chave de acesso: 44 digitos (em grupos de 4 na DANFE) */
+  var k=t.match(/(?:\d{4}[\s.]*){11}/);
+  var key='';
+  if(k){key=nfDigits(k[0]).slice(0,44);if(key.length===44){
+    var nn=String(parseInt(key.slice(25,34),10)||'');
+    if(nn&&nn!=='NaN')out.num=nn;
+    t=t.replace(k[0],' ');
+  }}
+  /* nome do destinatario */
+  out.client=nfValue(t,/NOME\s*\/\s*RAZ[ÃA]O\s*SOCIAL|NOME\s*\/\s*RAZAO\s*SOCIAL|RAZ[ÃA]O\s*SOCIAL|RAZAO\s*SOCIAL/i,
+    /\b(CNPJ|CPF|ENDERE|DATA|INSCRI|FONE|CEP)\b/i);
+  if(!out.client)out.client=nfValue(t,/DESTINAT[ÁA]RIO/i,/\b(CNPJ|CPF|ENDERE|DATA|INSCRI|FONE|CEP)\b/i);
+  if(/^(NOME|DESTINAT|RAZ[ÃA]O)/i.test(out.client))out.client='';
+  /* CNPJ / CPF do destinatario (evita o do remetente no topo) */
+  var pos=t.search(/DESTINAT[ÁA]RIO/i), dt=pos>=0?t.slice(pos):t;
+  var doc=dt.match(/\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/)||dt.match(/\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/)||
+          dt.match(/\b\d{14}\b/)||dt.match(/\b\d{11}\b/);
+  if(!doc&&dt!==t){doc=t.match(/\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/)||t.match(/\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/)}
+  if(doc)out.doc=nfDigits(doc[0]);
+  /* endereco, bairro e CEP */
+  var end=nfValue(t,/ENDERE[ÇC]O/i,/\b(BAIRRO|CEP|MUNIC[ÍI]PIO|FONE|CNPJ|CPF)\b/i);
+  var bai=nfValue(t,/BAIRRO\s*\/?\s*DISTRITO|BAIRRO/i,/\b(CEP|MUNIC[ÍI]PIO|FONE|UF|CNPJ)\b/i);
+  var cep=t.match(/\b\d{5}-?\d{3}\b/),cepTxt='';
+  if(cep){var cd=nfDigits(cep[0]);cepTxt='CEP '+cd.slice(0,5)+'-'+cd.slice(5)}
+  out.addr=[end,bai,cepTxt].filter(function(x){return !!x}).join(' - ');
+  /* municipio / UF */
+  var mun=nfValue(t,/MUNIC[ÍI]PIO/i,/\b(UF|FONE|CEP|INSCRI|SUBTOTAL|VALOR|TOTAL)\b/i);
+  var uf=nfValue(t,/\bUF\b/i,/\b(FONE|CEP|INSCRI|SUBTOTAL|VALOR|TOTAL)\b/i);
+  uf=(uf.match(/\b[A-Z]{2}\b/)||[''])[0];
+  out.city=[mun,uf].filter(function(x){return !!x}).join(' / ');
+  /* peso bruto */
+  var pb=nfValue(t,/PESO\s*BRUTO/i,/\b(PESO\s*L[ÍI]QUIDO|ESP[ÉE]CIE|QUANTIDADE|VALOR|TOTAL)\b/i);
+  var pv=pb.match(/\d{1,3}(?:[.,]\d{1,3})?(?:[.,]\d{1,3})?/);
+  if(pv)out.weight=pv[0]+' kg';
+  /* numero da nota, se a chave nao veio */
+  if(!out.num){
+    var num=t.match(/\bN[ºO°]\s*[.:]?\s*([\d.\/]{1,18})/i);
+    if(num){var nd=nfDigits(num[1]);if(nd)out.num=String(parseInt(nd,10))}
+  }
+  return out;
+}
+function applyInvoiceData(d){
+  function set(id,v){var el=document.getElementById(id);if(el&&v)el.value=v}
+  set('e-client',d.client);
+  set('e-city',d.city);
+  set('e-addr',d.addr);
+  set('e-num',d.num);
+  if(d.weight){var w=document.getElementById('e-weight');if(w)w.value=d.weight.slice(0,12)}
+  if(d.doc){var doc=document.getElementById('e-doc');if(doc){doc.value=d.doc;try{maskOnly(doc)}catch(e){}}}
+}
+function pickInvoicePhoto(){
+  var i=document.getElementById('e-photo');
+  if(i){i.value='';i.click()}
+}
+async function readInvoice(input){
+  var f=input&&input.files&&input.files[0];
+  if(!f)return;
+  if(!/^image\//.test(f.type))return toast('Escolha uma foto da nota fiscal.');
+  if(f.size>12*1024*1024)return toast('A foto é muito grande. Use uma imagem menor que 12 MB.');
+  nfStatus('Preparando a foto…');
+  try{
+    var img=await nfImage(f);
+    nfStatus('Baixando o leitor de texto (só na primeira vez)…');
+    var T=await loadTesseract();
+    var worker=await T.createWorker('por',1,{logger:function(m){
+      if(m&&m.status==='recognizing text')nfStatus('Lendo a nota… '+Math.round((m.progress||0)*100)+'%');
+    }});
+    try{await worker.setParameters({preserve_interword_spaces:'1'})}catch(e){}
+    var r=await worker.recognize(img);
+    await worker.terminate();
+    var txt=(r&&r.data&&r.data.text)||'';
+    var pre=document.getElementById('e-nf-pre'),box=document.getElementById('e-nf-text');
+    if(pre)pre.textContent=txt.trim()||'(nenhum texto encontrado)';
+    if(box)box.hidden=!txt.trim();
+    var d=parseInvoiceText(txt);
+    var got=[d.client&&'destinatário',d.doc&&'CPF/CNPJ',d.city&&'cidade',d.addr&&'endereço',d.num&&'nº da nota',d.weight&&'peso'].filter(Boolean);
+    if(!got.length){nfStatus('Não consegui identificar os dados nesta foto. Tente outra, mais reta e com boa luz.',true);return}
+    applyInvoiceData(d);
+    nfStatus('Preenchi: '+got.join(', ')+'. Confira os campos antes de imprimir.');
+    toast('Dados da nota preenchidos. Confira antes de imprimir.');
+  }catch(e){
+    var msg=e&&e.message==='internet'?'Sem internet para baixar o leitor de texto. Tente quando estiver conectado.':'Não consegui ler esta foto. Tente outra, mais nítida e sem sombra.';
+    nfStatus(msg,true);
+  }finally{
+    if(input)input.value='';
+  }
 }
 function labelFor(id){window._pre=id;go('etiquetas')}
 function initLabelTab(){
@@ -1498,10 +1414,15 @@ function downloadLabels(){
 }
 function saveBlob(url,name){var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 function vEtiquetas(){
-  var os=S.orders.filter(function(o){return o.status!=='Cancelado'}).map(function(o){return '<option value="'+o.id+'">'+esc(o.num)+' – '+esc(o.client)+(o.city?' – '+esc(o.city):'')+'</option>'}).join('');
+  var os=S.orders.filter(function(o){return o.status!=='Cancelado'}).map(function(o){return '<option value="'+o.id+'">'+esc(o.num)+' – '+esc(o.client||o.city||'')+(o.client&&o.city?' – '+esc(o.city):'')+'</option>'}).join('');
   var sizes=LBL_SIZES.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>'}).join('');
   return '<div class="card"><h2>Etiquetas de envio (impressora térmica)</h2>'+
-  '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Escolha um pedido para preencher automaticamente, ou digite uma etiqueta avulsa. Gera um PDF com uma etiqueta por volume, em preto e branco, no tamanho da sua bobina.</p><div class="row">'+
+  '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Escolha um pedido para preencher automaticamente, ou digite uma etiqueta avulsa. Gera um PDF com uma etiqueta por volume, em preto e branco, no tamanho da sua bobina.</p>'+
+  '<div class="nfrow"><button type="button" class="btn ghost" onclick="pickInvoicePhoto()">Anexar foto da nota fiscal</button>'+
+  '<input id="e-photo" type="file" accept="image/*" hidden onchange="readInvoice(this)">'+
+  '<small id="e-nf-status">O programa lê a foto e preenche destinatário, CPF/CNPJ, cidade, endereço, nº da nota e peso. Confira tudo antes de imprimir. Precisa de internet na primeira vez.</small></div>'+
+  '<details class="nftext" id="e-nf-text" hidden><summary>Texto que o programa leu na foto</summary><pre id="e-nf-pre"></pre></details>'+
+  '<div class="row">'+
   '<label style="flex:1 1 100%">Pedido<select id="e-order" onchange="fillLabel()"><option value="">Etiqueta avulsa (digitar)</option>'+os+'</select></label>'+
   '<label style="flex:2 1 220px">Destinatário<input id="e-client"></label>'+
   '<label style="flex:1 1 190px">CPF / CNPJ (opcional)<input id="e-doc" maxlength="18" inputmode="numeric" placeholder="Só os números" oninput="docMask(this)"><span id="e-doc-type" style="font-size:11.5px;font-weight:400">CPF ou CNPJ</span></label>'+
@@ -1536,7 +1457,7 @@ function vEstoque(){
 }
 function vMover(){
   if(!S.products.length)return '<div class="card empty">Cadastre um produto na aba Estoque para registrar movimentações.</div>';
-  var open=S.orders.filter(function(o){return o.status==='Pendente'}).map(function(o){return '<option value="'+esc(o.num)+'">'+esc(o.client)+'</option>'}).join('');
+  var open=S.orders.filter(function(o){return o.status==='Pendente'}).map(function(o){return '<option value="'+esc(o.num)+'">'+esc(o.client||o.city||'')+'</option>'}).join('');
   return '<div class="card"><h2>Registrar movimentação</h2><div class="row">'+
   '<label>Tipo<select id="m-type" onchange="refLabel()"><option>Entrada</option><option>Saída</option></select></label>'+
   '<label style="flex:2 1 220px">Produto<select id="m-prod">'+opts()+'</select></label>'+
@@ -1553,7 +1474,7 @@ function refLabel(){
 }
 function vPedidos(){
   var dl=draft.map(function(i,k){return '<li><span>'+esc(itemName(i))+' × '+i.qty+(isFreeItem(i)?' <span class="tag">fora do estoque</span>':'')+'</span><button class="btn danger sm" onclick="rmDraft('+k+')">Remover</button></li>'}).join('');
-  var form='<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:2 1 220px">Cliente<input id="o-client" value="'+esc(window._cl||'')+'" oninput="window._cl=this.value"></label><label style="flex:1 1 180px">Cidade de destino<input id="o-city" list="cities" placeholder="Ex.: Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label></div>'+
+  var form='<div class="card"><h2>Novo pedido</h2><div class="row"><label style="flex:1 1 170px">Pedido feito por<input id="o-made" maxlength="60" placeholder="Ex.: Ana" value="'+esc(window._made||'')+'" oninput="window._made=this.value"></label><label style="flex:2 1 240px">Cidade de destino e cliente<input id="o-city" list="cities" placeholder="Ex.: Ana - Joinville / SC" value="'+esc(window._city||'')+'" oninput="window._city=this.value"></label></div>'+
   '<div class="row"><label style="flex:1 1 150px">Peso (opcional)<input id="o-weight" maxlength="20" placeholder="Ex.: 2,5 kg" value="'+esc(window._oWeight||'')+'" oninput="window._oWeight=this.value"></label>'+
   '<label style="flex:1 1 150px">Volume (opcional)<input id="o-volume" maxlength="20" placeholder="Ex.: 3 caixas ou 0,12 m³" value="'+esc(window._oVolume||'')+'" oninput="window._oVolume=this.value"></label></div>'+
   (S.products.length?'<div class="row"><label style="flex:2 1 220px">Produto do estoque<select id="o-prod">'+opts()+'</select></label><label>Quantidade<input id="o-qty" type="number" min="1" value="1"></label>'+
@@ -1566,7 +1487,7 @@ function vPedidos(){
   var list=S.orders.map(function(o){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
     var items=o.items.map(function(i){return '<li>'+esc(itemName(i))+' × '+i.qty+(isFreeItem(i)?' <span class="tag">fora do estoque</span>':'')+'</li>'}).join('');
-    return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client)+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+(o.avulso?' · pedido avulso':'')+'</small>'+(o.city?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+((o.weight||o.volume)?'<div style="margin-top:4px">'+(o.weight?'<strong>Peso:</strong> '+esc(o.weight):'')+(o.weight&&o.volume?' · ':'')+(o.volume?'<strong>Volume:</strong> '+esc(o.volume):'')+'</div>':'')+'<ul>'+items+'</ul>'+
+    return '<div class="order"><header><strong>'+esc(o.num)+' – '+esc(o.client||o.city||'')+'</strong><span class="tag '+cls+'">'+o.status+'</span></header><small style="color:var(--muted)">'+fmt(o.date)+(o.by?' · '+esc(o.by):'')+(o.avulso?' · pedido avulso':'')+'</small>'+(o.madeBy?'<div style="margin-top:4px"><strong>Pedido feito por:</strong> '+esc(o.madeBy)+'</div>':'')+(o.city&&o.client?'<div style="margin-top:4px"><strong>Destino:</strong> '+esc(o.city)+'</div>':'')+((o.weight||o.volume)?'<div style="margin-top:4px">'+(o.weight?'<strong>Peso:</strong> '+esc(o.weight):'')+(o.weight&&o.volume?' · ':'')+(o.volume?'<strong>Volume:</strong> '+esc(o.volume):'')+'</div>':'')+'<ul>'+items+'</ul>'+
     (o.status==='Pendente'?'<button class="btn sm" onclick="fulfill(\''+o.id+'\')">'+(o.avulso?'Marcar como atendido':'Dar baixa no estoque')+'</button> <button class="btn danger sm" onclick="cancelOrder(\''+o.id+'\')">Cancelar</button> ':'')+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta de envio</button> ':'')+'<button class="btn ghost sm" onclick="orderPdf(\''+o.id+'\')">Pedido em PDF</button> '+(o.status==='Cancelado'?'':'<button class="btn ghost sm" onclick="editOrder(\''+o.id+'\')">Editar pedido</button> ')+'<button class="btn danger sm" onclick="delOrder(\''+o.id+'\')">Excluir pedido</button></div>';
   }).join('');
   var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
@@ -1589,7 +1510,7 @@ function hpOrders(){
     if(from!==null&&o.date<from)return false;
     if(to!==null&&o.date>to)return false;
     if(!words.length)return true;
-    var hay=[o.num,o.client,o.city||'',o.by||'',o.status,o.avulso?'avulso':'',o.weight||'',o.volume||''].concat((o.items||[]).map(itemName)).join(' ').toLowerCase();
+    var hay=[o.num,o.client||'',o.madeBy||'',o.city||'',o.by||'',o.status,o.avulso?'avulso':'',o.weight||'',o.volume||''].concat((o.items||[]).map(itemName)).join(' ').toLowerCase();
     return words.every(function(w){return hay.indexOf(w)>=0});
   }).sort(function(a,b){return b.date-a.date});
 }
@@ -1602,7 +1523,7 @@ function hpRows(){
     var cls=o.status==='Atendido'?'t-ok':o.status==='Cancelado'?'t-bad':'t-warn';
     var items=(o.items||[]).map(function(i){return esc(itemName(i))+' × '+i.qty}).join('<br>');
     var un=(o.items||[]).reduce(function(s,i){return s+i.qty},0);
-    return '<tr><td>'+fmt(o.date)+'</td><td><strong>'+esc(o.num)+'</strong>'+(o.avulso?'<br><span class="tag">avulso</span>':'')+'</td><td>'+esc(o.client)+'</td><td>'+esc(o.city||'—')+'</td><td>'+items+'</td><td class="n">'+un+'</td><td><span class="tag '+cls+'">'+o.status+'</span></td><td><button class="btn ghost sm" onclick="orderPdf(\''+o.id+'\')">PDF</button> '+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta</button>':'')+'</td></tr>';
+    return '<tr><td>'+fmt(o.date)+'</td><td><strong>'+esc(o.num)+'</strong>'+(o.avulso?'<br><span class="tag">avulso</span>':'')+'</td><td>'+esc(o.client||'—')+'</td><td>'+esc(o.city||'—')+'</td><td>'+items+'</td><td class="n">'+un+'</td><td><span class="tag '+cls+'">'+o.status+'</span></td><td><button class="btn ghost sm" onclick="orderPdf(\''+o.id+'\')">PDF</button> '+(o.status!=='Cancelado'?'<button class="btn ghost sm" onclick="labelFor(\''+o.id+'\')">Etiqueta</button>':'')+'</td></tr>';
   }).join('');
   return '<p class="report-subtitle" style="margin:0 0 8px">'+list.length+' pedido(s) encontrado(s) · '+units+' unidade(s)</p>'+
     '<div class="scroll"><table class="t-hped"><thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Cidade</th><th>Itens</th><th class="n">Un.</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -1694,8 +1615,8 @@ function ordersNotice(oldList,newList){
   });
   excl=Object.keys(oldMap).length;
   var parts=[];
-  if(novo)parts.push('novo pedido de '+novo.client+' ('+novo.num+')');
-  if(atend.length)parts.push('o pedido '+atend[0].num+' de '+atend[0].client+' foi atendido'+(atend.length>1?' (+'+(atend.length-1)+' outro'+(atend.length>2?'s':'')+')':''));
+  if(novo)parts.push('novo pedido de '+(novo.client||novo.madeBy||novo.city||'')+' ('+novo.num+')');
+  if(atend.length)parts.push('o pedido '+atend[0].num+' de '+(atend[0].client||atend[0].madeBy||atend[0].city||'')+' foi atendido'+(atend.length>1?' (+'+(atend.length-1)+' outro'+(atend.length>2?'s':'')+')':''));
   if(canc)parts.push(canc>1?canc+' pedidos foram cancelados':'um pedido foi cancelado');
   if(excl)parts.push(excl>1?excl+' pedidos foram excluídos':'um pedido foi excluído');
   if(!parts.length)return '';
@@ -1746,7 +1667,7 @@ async function resetPass(){
 }
 function logout(){if(confirm('Sair do sistema?'))auth.signOut()}
 var ordersLoaded=false;
-function stopListening(){unsubs.forEach(function(u){u()});unsubs=[];ready={p:false,o:false,m:false,c:false};S={products:[],orders:[],moves:[],users:[],seq:1};ordersLoaded=false;hideSync();chatStop();var t=document.getElementById('chat-pop');if(t){t.classList.remove('on');t.innerHTML=''}}
+function stopListening(){unsubs.forEach(function(u){u()});unsubs=[];ready={p:false,o:false,m:false,c:false};S={products:[],orders:[],moves:[],users:[],seq:1};ordersLoaded=false;hideSync()}
 function startListening(){
   var onErr=function(e){fail(e)};
   unsubs.push(db.collection('products').onSnapshot(function(s){
@@ -1771,7 +1692,6 @@ function startListening(){
   },onErr));
   unsubs.push(db.collection('users').onSnapshot(function(s){
     S.users=s.docs.map(function(d){return Object.assign({email:d.id},d.data())});
-    if(chatOpen&&!chatWith)chatPaint();
   },function(){}));
 }
 function boot(){
