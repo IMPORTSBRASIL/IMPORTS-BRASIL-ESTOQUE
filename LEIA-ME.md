@@ -69,7 +69,31 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 
 ---
 
-## Novidades desta atualização (visual e celular)
+## Novidades da versão 4.4 (layout novo)
+
+O programa ganhou a tela inicial com atalhos, menu e barra inferior — o visual pedido,
+funcionando igual no **Android, no iPhone e no computador**. Nenhuma função do sistema mudou.
+
+- **Tela Início:** ao entrar, você vê um resumo no topo (produtos, pedidos e unidades), seis
+  atalhos grandes — **Pedidos, Etiquetas, Estoque, Relatório, Movimentar e Hist. pedidos** —,
+  um aviso quando há produto zerado/abaixo do mínimo (ou pedido pendente) e o botão
+  **Criar novo pedido**, que já abre o formulário na aba Pedidos.
+- **Menu (ícone ☰ no canto superior esquerdo):** abre a lista de todas as seções e mostra a
+  conta logada, o botão **Baixar backup**, o **Tema claro/escuro** e **Sair da conta**.
+  O círculo com as iniciais no canto direito abre o mesmo menu.
+- **Barra inferior no celular:** **Início · Pedidos · Etiquetas · Gestão**. Gestão abre o
+  menu com Estoque, Relatório, Movimentar e os históricos. No computador essa barra some e
+  as seções ficam numa faixa de abas no topo.
+- **Visual escuro por padrão**, com cartões arredondados e cores nos atalhos — parecido com o
+  aplicativo de referência. Se preferir claro, troque em **Menu > Tema claro** (fica salvo no
+  aparelho).
+- **Computador:** a mesma tela ocupa a largura da janela, com os atalhos em 3 colunas e as
+  abas de seções sempre visíveis no topo.
+- **Celular:** campos e botões no tamanho do dedo, barra inferior fixa respeitando a área
+  segura do iPhone, e o título da seção sempre no topo (não precisa mais rolar até o menu).
+- **Cabeçalho fixo:** o título da tela e os botões de menu/conta continuam visíveis ao rolar.
+
+## Novidades das versões anteriores (visual e celular)
 Interface refeita, sem mudar nenhuma função do sistema (login, estoque, pedidos, histórico,
 etiquetas e relatórios continuam iguais).
 
@@ -205,7 +229,7 @@ etiquetas e relatórios continuam iguais).
   tremida, escura ou torta pode fazer o programa errar. Na primeira vez o programa baixa
   um leitor de texto (~15 MB) e por isso precisa de internet; depois fica mais rápido.
   A foto não é enviada para lugar nenhum: a leitura acontece no próprio celular/computador.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.3).
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.4).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:
