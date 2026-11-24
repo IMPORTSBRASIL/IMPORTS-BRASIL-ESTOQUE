@@ -69,6 +69,23 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 
 ---
 
+## Novidades da versão 4.5 (toque no celular)
+
+Botões, atalhos e abas ficaram maiores e mais fáceis de acertar com o dedo.
+Nenhuma função mudou — só o tamanho e o jeito de tocar.
+
+- **Botões mais altos:** os botões comuns passaram a ter ~50px de altura (o recomendado para
+  o dedo é pelo menos 48px), e os botões pequenos das listas (editar, excluir, etc.) ficaram
+  com 46px e mais espaço entre eles, para não apertar o botão errado.
+- **Atalhos da tela Início maiores**, com ícone maior e texto um pouco maior.
+- **Barra inferior mais confortável:** as quatro abas (Início, Pedidos, Etiquetas, Gestão)
+  ficaram mais altas, com ícone maior.
+- **Menu lateral:** cada item do menu com 52px de altura; o botão de fechar também cresceu.
+- **Campos de digitação** com no mínimo 48px de altura.
+- **Resposta mais rápida ao toque:** o programa não espera mais o “duplo toque” do navegador,
+  então o botão reage na hora, e o retângulo azul de seleção ao tocar some.
+- Vale para Android, iPhone e também computador com tela de toque.
+
 ## Novidades da versão 4.4 (layout novo)
 
 O programa ganhou a tela inicial com atalhos, menu e barra inferior — o visual pedido,
@@ -229,7 +246,7 @@ etiquetas e relatórios continuam iguais).
   tremida, escura ou torta pode fazer o programa errar. Na primeira vez o programa baixa
   um leitor de texto (~15 MB) e por isso precisa de internet; depois fica mais rápido.
   A foto não é enviada para lugar nenhum: a leitura acontece no próprio celular/computador.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.4).
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.5).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

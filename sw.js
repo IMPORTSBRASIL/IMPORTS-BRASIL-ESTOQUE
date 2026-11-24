@@ -1,4 +1,4 @@
-const CACHE = "estoque-web-v28";
+const CACHE = "estoque-web-v29";
 const FILES = ["./", "./index.html", "./firebase-config.js", "./manifest.json", "./logo.png", "./icon-192.png", "./icon-180.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 self.addEventListener("install", (e) => {

@@ -357,7 +357,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 }
 
 
-/* ---------- LAYOUT NOVO v4.4: tema escuro, início com atalhos, menu e barra inferior ---------- */
+/* ---------- LAYOUT NOVO v4.4+: tema escuro, início com atalhos, menu e barra inferior ---------- */
 html{scroll-padding-top:70px}
 body{min-height:100dvh}
 main{padding-top:0}
@@ -501,6 +501,41 @@ select{background-color:var(--surface-soft)}
 .mitem.danger,.mitem.danger svg{color:var(--bad)}
 .mfoot{color:var(--muted);font-size:11px;text-align:center;margin:20px 0 0;line-height:1.5}
 
+/* ---------- toque (v4.5): alvos maiores e resposta imediata no dedo ---------- */
+button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,a,summary{-webkit-tap-highlight-color:transparent}
+button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-action:manipulation}
+@media (max-width:899px){
+  /* botões, atalhos e avisos com altura de dedo (mínimo 48px) */
+  .tile{min-height:116px;padding:15px 14px}
+  .tile-ico{width:42px;height:42px;border-radius:12px}
+  .tile-ico svg{width:21px;height:21px}
+  .tile-label{font-size:15px}
+  .tile-sub{font-size:12px}
+  .notice{min-height:58px;padding:13px 14px}
+  .btn{min-height:50px;padding:13px 18px;font-size:15px;border-radius:12px}
+  .btn.sm{min-height:46px;padding:11px 14px;font-size:14px}
+  .btn.cta{min-height:54px}
+  .link{min-height:46px;padding:14px 0 0;font-size:14px}
+  .iconbtn,.appbar .iconbtn{width:46px;height:46px}
+  .avatar{width:42px;height:42px}
+  .avatar.big{width:48px;height:48px}
+  input,select,textarea{min-height:48px}
+  /* barra inferior: cada aba com 54px de altura e ícone maior */
+  .tabbar{gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px))}
+  .tabbar button{min-height:54px;padding:8px 4px;font-size:11px;gap:4px}
+  .tabbar button svg{width:23px;height:23px}
+  /* menu lateral: itens altos, fáceis de acertar */
+  .mitem{min-height:52px;padding:12px;font-size:14.5px}
+  .mhead .iconbtn{width:44px;height:44px}
+  /* abas de seção no topo (quando aparecem) */
+  nav button{min-height:44px;padding:11px 16px;font-size:14px}
+  /* ações dentro dos cartões das listas: mais altas e com folga entre elas */
+  .t-estoque td:last-child,.t-hist td:last-child,.t-hped td:last-child{gap:10px;padding-top:14px}
+  .t-estoque td:last-child .btn,.t-hist td:last-child .btn,.t-hped td:last-child .btn{min-height:46px;flex:1 1 45%}
+  .syncbar{padding:12px 13px;gap:12px}
+  .syncbar .btn{min-height:46px;flex:1 1 100%}
+}
+
 @media (max-width:899px){
   main{padding-top:0;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
   .appbar{margin:0 -14px 14px;padding:7px 10px}
@@ -569,7 +604,7 @@ select{background-color:var(--surface-soft)}
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.4</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.5</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <header class="appbar">
@@ -581,7 +616,7 @@ select{background-color:var(--surface-soft)}
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="syncbar" class="syncbar" role="status" aria-live="polite" hidden></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.4</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.5</strong></span></footer>
 <div id="tabbar" class="tabbar" aria-label="Navegação rápida"></div>
 <div id="menu" class="drawer-wrap" hidden onclick="if(event.target===this)closeMenu()"><aside class="drawer" role="dialog" aria-modal="true" aria-label="Menu"><div id="menu-body"></div></aside></div>
 </div>
@@ -1666,7 +1701,7 @@ function fillMenu(){
     '<button class="mitem" onclick="toggleTheme()">'+svg('tema')+'<span>Tema '+(light?'escuro':'claro')+'</span></button>'+
     '<button class="mitem" onclick="downloadBackup()">'+svg('backup')+'<span>Baixar backup</span></button>'+
     '<button class="mitem danger" onclick="logout()">'+svg('sair')+'<span>Sair da conta</span></button>'+
-    '<p class="mfoot">IMPORTS BRASIL · Versão 4.4<br>Desenvolvido por Rafael Antonio</p>';
+    '<p class="mfoot">IMPORTS BRASIL · Versão 4.5<br>Desenvolvido por Rafael Antonio</p>';
 }
 function openMenu(){var m=document.getElementById('menu');if(!m)return;fillMenu();m.hidden=false;document.body.style.overflow='hidden'}
 function closeMenu(){var m=document.getElementById('menu');if(!m)return;m.hidden=true;document.body.style.overflow=''}
