@@ -1,4 +1,4 @@
-const CACHE = "estoque-web-v36";
+const CACHE = "estoque-web-v37";
 const CDN_CACHE = CACHE + "-cdn";
 const FILES = ["./", "./index.html", "./firebase-config.js", "./manifest.json", "./logo.png", "./icon-192.png", "./icon-180.png", "./icon-512.png", "./icon-maskable-512.png"];
 // scripts do Firebase: sem eles o programa nao abre sem internet

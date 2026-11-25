@@ -69,6 +69,16 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 
 ---
 
+## Novidades da versão 5.3 (tela de entrar moderna)
+
+- **Tela de entrar** com o mesmo visual do resto do programa: cartão arredondado com o topo em
+  degradê (roxo → verde-água), o logo e o nome **IMPORTS BRASIL** em destaque, e o formulário logo
+  abaixo, com o botão **Entrar** grande e o link **Esqueci a senha** centralizado.
+- Funciona no tema escuro e no tema claro e fica do mesmo jeito no celular e no computador. O
+  login em si não mudou: continue usando o mesmo e-mail e senha de sempre.
+
+---
+
 ## Novidades da versão 5.2 (pedidos recolhidos e botão centralizado)
 
 - **Aba Pedidos:** a lista dos pedidos já feitos agora começa **recolhida**, dentro de um cartão
@@ -351,7 +361,7 @@ etiquetas e relatórios continuam iguais).
   tremida, escura ou torta pode fazer o programa errar. Na primeira vez o programa baixa
   um leitor de texto (~15 MB) e por isso precisa de internet; depois fica mais rápido.
   A foto não é enviada para lugar nenhum: a leitura acontece no próprio celular/computador.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (5.2).
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (5.3).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

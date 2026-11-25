@@ -176,16 +176,28 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 49%,va
 .btn.sm{padding:7px 12px;font-size:13px;min-height:36px;border-radius:9px}
 #setup code{background:var(--surface-soft);padding:2px 6px;border-radius:5px;border:1px solid var(--line)}
 
-/* ---------- login ---------- */
-.login{max-width:400px;margin:6vh auto 0}
-.login .brand{justify-content:center;text-align:left;margin-bottom:20px}
-.login .brandlogo{width:64px;height:64px;border-radius:18px;box-shadow:0 8px 22px rgba(15,42,54,.28)}
-.login-card{box-shadow:var(--shadow);border-radius:var(--r-lg);padding:24px}
-.login-card h2{font-size:19px;margin-bottom:4px}
-.login-sub{color:var(--muted);font-size:13px;margin-bottom:18px}
-.login .row{flex-direction:column;align-items:stretch;gap:14px}
+/* ---------- login (v5.3) ---------- */
+.login{max-width:404px;margin:0 auto;padding:clamp(12px,5vh,46px) 0 18px;position:relative}
+.login::before{
+  content:"";position:absolute;left:-40px;right:-40px;top:-30px;height:280px;z-index:-1;pointer-events:none;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--brand) 20%,transparent),transparent 78%);
+}
+.login-card{box-shadow:var(--shadow);border-radius:var(--r-lg);padding:0;overflow:hidden;margin-bottom:0}
+.login-top{
+  display:flex;align-items:center;gap:14px;padding:22px;color:#fff;
+  background:linear-gradient(118deg,#38308c 0%,#5b53e8 52%,#2bab9d 100%);
+}
+.login-top .brandlogo{width:56px;height:56px;border-radius:17px;background:#0b0b0b;flex:0 0 auto;box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.login-top h1{font-size:18px;letter-spacing:.01em;color:#fff;line-height:1.15}
+.login-top small{display:block;color:rgba(255,255,255,.82);font-size:12px;margin-top:3px}
+.login-body{padding:22px}
+.login-body h2{font-size:19px;margin:0 0 4px}
+.login-sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.login .row{flex-direction:column;align-items:stretch;gap:13px}
 .login .row>label{flex:0 0 auto}
-.login .btn{width:100%;min-height:46px}
+.login .btn{width:100%;min-height:48px;margin-top:2px}
+.login .link{display:block;width:100%;text-align:center;padding:14px 0 2px}
+.login .err{margin:10px 0 0}
 .err{color:var(--bad);font-size:13px;min-height:18px;margin:12px 0 0;font-weight:500}
 .link{background:none;border:0;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:12px 0 0;text-decoration:none}
 .link:hover{text-decoration:underline}
@@ -265,8 +277,10 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   input,select,textarea{font-size:16px} /* evita zoom automático no iPhone */
   .btn{min-height:var(--tap);padding:11px 16px;font-size:14px}
   .btn.sm{min-height:40px}
-  .login{margin:3vh auto 0}
-  .login-card{padding:20px;border-radius:18px}
+  .login{padding-top:2vh}
+  .login-card{border-radius:18px}
+  .login-body{padding:18px}
+  .login-top{padding:18px}
   .card>.row>.btn{width:100%}
   .brand h1{font-size:16.5px}
   .brandlogo{width:38px;height:38px;border-radius:11px}
@@ -622,15 +636,16 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 <p>Falta conectar o sistema ao banco de dados. Abra o arquivo <code>firebase-config.js</code>, cole os dados do seu projeto Firebase e publique de novo. O passo a passo está no <code>LEIA-ME.md</code>.</p></div></div>
 
 <div id="login" class="login" style="display:none">
-<div class="brand"><img class="brandlogo" src="logo.png" alt="IMPORTS BRASIL" width="64" height="64"><div><h1>IMPORTS BRASIL</h1><small>Controle de estoque</small></div></div>
-<form class="card login-card" onsubmit="doLogin(event)"><h2>Entrar na conta</h2>
+<form class="card login-card" onsubmit="doLogin(event)">
+<div class="login-top"><img class="brandlogo" src="logo.png" alt="IMPORTS BRASIL" width="56" height="56"><div><h1>IMPORTS BRASIL</h1><small>Controle de estoque e pedidos</small></div></div>
+<div class="login-body"><h2>Entrar na conta</h2>
 <p class="login-sub">Acesse com o e-mail e a senha da empresa.</p><div class="row">
 <label>E-mail<input id="l-email" type="email" autocomplete="username" inputmode="email" placeholder="seuemail@empresa.com"></label>
 <label>Senha<input id="l-pass" type="password" autocomplete="current-password" placeholder="Sua senha"></label>
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
-<button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.2</strong></span></footer></div>
+<button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></div></form>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.3</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <header class="appbar">
@@ -643,7 +658,7 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 <div id="syncbar" class="syncbar" role="status" aria-live="polite" hidden></div>
 <div id="offbar" class="syncbar offbar" role="status" aria-live="polite" hidden></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.2</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.3</strong></span></footer>
 <div id="tabbar" class="tabbar" aria-label="Navegação rápida"></div>
 <div id="menu" class="drawer-wrap" hidden onclick="if(event.target===this)closeMenu()"><aside class="drawer" role="dialog" aria-modal="true" aria-label="Menu"><div id="menu-body"></div></aside></div>
 </div>
@@ -2040,7 +2055,7 @@ function fillMenu(){
     '<button class="mitem" onclick="toggleTheme()">'+svg('tema')+'<span>Tema '+(light?'escuro':'claro')+'</span></button>'+
     '<button class="mitem" onclick="downloadBackup()">'+svg('backup')+'<span>Baixar backup</span></button>'+
     '<button class="mitem danger" onclick="logout()">'+svg('sair')+'<span>Sair da conta</span></button>'+
-    '<p class="mfoot">IMPORTS BRASIL · Versão 5.2<br>Desenvolvido por Rafael Antonio</p>';
+    '<p class="mfoot">IMPORTS BRASIL · Versão 5.3<br>Desenvolvido por Rafael Antonio</p>';
 }
 function openMenu(){var m=document.getElementById('menu');if(!m)return;fillMenu();m.hidden=false;document.body.style.overflow='hidden'}
 function closeMenu(){var m=document.getElementById('menu');if(!m)return;m.hidden=true;document.body.style.overflow=''}
