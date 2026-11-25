@@ -69,6 +69,35 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 
 ---
 
+## Novidades da versão 5.2 (pedidos recolhidos e botão centralizado)
+
+- **Aba Pedidos:** a lista dos pedidos já feitos agora começa **recolhida**, dentro de um cartão
+  **“Pedidos já feitos”** com a contagem (ex.: *12 pedido(s) · 3 pendentes*) e o botão
+  **Expandir / Recolher**. Ao abrir um pedido, a lista continua igual a antes, com os botões de dar
+  baixa, cancelar, etiqueta, PDF e editar. Depois de criar um pedido novo, toque em **Expandir** para
+  ver a lista.
+- **Tela inicial no computador:** o botão **Criar novo pedido** ficou **centralizado** na tela. No
+  celular continua ocupando a largura toda, como já era.
+
+---
+
+## Novidades da versão 5.1 (tela do computador mais limpa)
+
+No **computador**, a faixa de abas que ficava logo abaixo do título (**Início, Pedidos, Estoque,
+Etiquetas, Relatório, Movimentar, Hist. pedidos, Histórico**) foi **retirada** do topo. No lugar,
+a navegação passa a ser a **barrinha de baixo**, a mesma do celular:
+
+- **Início · Pedidos · Etiquetas · Gestão** — no computador ela aparece flutuando, centralizada
+  no rodapé da janela;
+- **Gestão** abre o menu com **todas** as seções (Estoque, Movimentar, Relatório, Hist. pedidos,
+  Histórico), além de tema, backup e sair;
+- o nome da tela em que você está continua aparecendo no topo, e os atalhos coloridos da tela
+  inicial continuam funcionando normalmente.
+
+Nada mudou no celular: a barra de baixo já era assim e o topo já era limpo.
+
+---
+
 ## Novidades da versão 5.0 (cadastro mais rápido e sem duplicar)
 
 ### 1) Foto da etiqueta preenche o cadastro
@@ -322,7 +351,7 @@ etiquetas e relatórios continuam iguais).
   tremida, escura ou torta pode fazer o programa errar. Na primeira vez o programa baixa
   um leitor de texto (~15 MB) e por isso precisa de internet; depois fica mais rápido.
   A foto não é enviada para lugar nenhum: a leitura acontece no próprio celular/computador.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (5.0).
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (5.2).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

@@ -564,12 +564,21 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
   .appbar h1{font-size:21px}
   .menu-btn{display:none}
   .hbrand{display:flex}
-  .navwrap{position:sticky;top:0;margin:0 0 20px;padding:10px 0;background:var(--nav-bg);border-bottom:1px solid var(--line);z-index:7}
-  .tabbar{display:none}
+  /* v5.1: no computador a faixa de abas do topo sai; a navegação fica na barra de baixo */
+  .navwrap{display:none}
+  .tabbar{
+    left:50%;right:auto;transform:translateX(-50%);
+    width:min(470px,calc(100% - 40px));bottom:18px;
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 12px 34px rgba(0,0,0,.28);padding:6px 8px;
+  }
+  .tabbar button{min-height:54px}
+  main{padding-bottom:calc(116px + env(safe-area-inset-bottom,0px))}
   .tile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .tile{min-height:112px}
   .home{max-width:920px}
-  .btn.cta{max-width:430px}
+  /* v5.2: botão "Criar novo pedido" centralizado na tela do computador */
+  .btn.cta{max-width:430px;margin-left:auto;margin-right:auto}
 }
 @media print{
   .appbar,.tabbar,.drawer-wrap{display:none!important}
@@ -621,7 +630,7 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.0</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.2</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <header class="appbar">
@@ -634,7 +643,7 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 <div id="syncbar" class="syncbar" role="status" aria-live="polite" hidden></div>
 <div id="offbar" class="syncbar offbar" role="status" aria-live="polite" hidden></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.0</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.2</strong></span></footer>
 <div id="tabbar" class="tabbar" aria-label="Navegação rápida"></div>
 <div id="menu" class="drawer-wrap" hidden onclick="if(event.target===this)closeMenu()"><aside class="drawer" role="dialog" aria-modal="true" aria-label="Menu"><div id="menu-body"></div></aside></div>
 </div>
@@ -1304,6 +1313,18 @@ function toggleList(){
   var willOpen=el.hidden;
   listOpen=willOpen;el.hidden=!willOpen;
   var b=document.getElementById('list-toggle');
+  if(b){b.textContent=willOpen?'Recolher':'Expandir';b.setAttribute('aria-expanded',willOpen?'true':'false')}
+  var head=el.parentNode;
+  if(!willOpen&&head&&head.scrollIntoView)head.scrollIntoView({block:'start',behavior:'smooth'});
+}
+
+/* ---------- pedidos já feitos (recolher / expandir) — v5.2 ---------- */
+var ordersOpen=false;
+function toggleOrders(){
+  var el=document.getElementById('orders-list');if(!el)return;
+  var willOpen=el.hidden;
+  ordersOpen=willOpen;el.hidden=!willOpen;
+  var b=document.getElementById('orders-toggle');
   if(b){b.textContent=willOpen?'Recolher':'Expandir';b.setAttribute('aria-expanded',willOpen?'true':'false')}
   var head=el.parentNode;
   if(!willOpen&&head&&head.scrollIntoView)head.scrollIntoView({block:'start',behavior:'smooth'});
@@ -2019,7 +2040,7 @@ function fillMenu(){
     '<button class="mitem" onclick="toggleTheme()">'+svg('tema')+'<span>Tema '+(light?'escuro':'claro')+'</span></button>'+
     '<button class="mitem" onclick="downloadBackup()">'+svg('backup')+'<span>Baixar backup</span></button>'+
     '<button class="mitem danger" onclick="logout()">'+svg('sair')+'<span>Sair da conta</span></button>'+
-    '<p class="mfoot">IMPORTS BRASIL · Versão 5.0<br>Desenvolvido por Rafael Antonio</p>';
+    '<p class="mfoot">IMPORTS BRASIL · Versão 5.2<br>Desenvolvido por Rafael Antonio</p>';
 }
 function openMenu(){var m=document.getElementById('menu');if(!m)return;fillMenu();m.hidden=false;document.body.style.overflow='hidden'}
 function closeMenu(){var m=document.getElementById('menu');if(!m)return;m.hidden=true;document.body.style.overflow=''}
@@ -2088,7 +2109,11 @@ function vPedidos(){
   }).join('');
   var cities=Array.from(new Set(S.orders.map(function(o){return o.city}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
   var dlc='<datalist id="cities">'+cities.map(function(c){return '<option value="'+esc(c)+'">'}).join('')+'</datalist>';
-  return form+dlc+'<h2>Pedidos</h2>'+(list||'<div class="empty">Nenhum pedido criado.</div>');
+  var pend=S.orders.filter(function(o){return o.status==='Pendente'}).length;
+  var orders='<div class="card"><div class="listhead"><div><h2 style="margin:0">Pedidos já feitos</h2><small style="color:var(--muted)">'+S.orders.length+' pedido(s)'+(pend?' · '+pend+' pendente'+(pend>1?'s':''):'')+'</small></div>'+
+    '<button class="btn ghost sm" id="orders-toggle" onclick="toggleOrders()" aria-controls="orders-list" aria-expanded="'+(ordersOpen?'true':'false')+'">'+(ordersOpen?'Recolher':'Expandir')+'</button></div>'+
+    '<div id="orders-list"'+(ordersOpen?'':' hidden')+'>'+(list||'<div class="empty">Nenhum pedido criado.</div>')+'</div></div>';
+  return form+dlc+orders;
 }
 /* ---------- histórico de pedidos (busca por nome e data) ---------- */
 function hpDate(iso,end){
