@@ -69,6 +69,82 @@ Todos os usuários logados têm as mesmas permissões (inclusive apagar e restau
 
 ---
 
+## Novidades da versão 5.0 (cadastro mais rápido e sem duplicar)
+
+### 1) Foto da etiqueta preenche o cadastro
+
+Na aba **Estoque**, no cartão **Novo produto**, apareceu o botão **Fotografar etiqueta do produto**.
+Tire (ou escolha) a foto da etiqueta impressa da embalagem e o programa lê o texto e tenta preencher:
+
+- **Nome** do produto (procura a linha “Descrição”, “Produto” ou “Nome”; se não achar, usa a linha
+  com mais letras da etiqueta);
+- **Código / referência** (procura “REF”, “Código”, “Modelo” ou um código de barras de 8, 12, 13 ou
+  14 dígitos);
+- **Tamanhos** (procura “TAM” / “Tamanhos” e separa P, M, G, GG…).
+
+O programa só preenche campo **vazio** — não apaga o que você já digitou. Para conferir o que ele
+leu, abra **“Texto que o programa leu na foto”**. Como toda leitura de foto, pode errar: **sempre
+olhe os campos antes de salvar**. Etiqueta impressa e bem iluminada funciona bem; etiqueta escrita
+à mão, amassada ou com brilho costuma não ser lida. A leitura acontece no próprio aparelho (a foto
+não é enviada para lugar nenhum) e precisa de internet **na primeira vez**, para baixar o leitor.
+
+### 2) Aviso quando o produto já existe
+
+Ao clicar em **Salvar produto**, se já existe produto com o **mesmo nome e os mesmos tamanhos**
+(ignorando maiúsculas, acentos e a ordem dos tamanhos), o programa **não cadastra duplicado**:
+mostra um quadro amarelo com o código e a quantidade atual do produto existente e três opções:
+
+- **Somar N un. ao estoque existente** — entra como movimentação “Cadastro somado” no Histórico;
+- **Cadastrar como novo mesmo assim** — para quando é outra peça de verdade;
+- **Cancelar**.
+
+### 3) Código / referência do fornecedor no produto
+
+O cadastro e a janela **Editar produto** ganharam o campo **Código / referência** (opcional).
+Ele aparece embaixo do nome na lista de produtos e entra na **busca** — dá para achar a peça pelo
+código do fornecedor, não só pelo IMP-0001.
+
+## Novidades da versão 4.9 (avisos de notificação removidos)
+
+A opção de avisos de pedido novo no celular foi removida a pedido. O que mudou na prática:
+
+- O item **Avisos de pedido novo** saiu do menu.
+- O programa não pede mais permissão de notificação e não mostra avisos na tela do celular.
+- O aviso amarelo dentro do próprio app, quando outro usuário mexe nos pedidos, continua igual.
+- Todo o resto continua funcionando igual, inclusive o modo sem internet.
+
+## Novidades da versão 4.7 (funciona sem internet)
+
+Quando o sinal do galpão cai, dá para continuar trabalhando: o programa guarda a operação
+no próprio aparelho e envia ao sistema sozinho quando a conexão volta.
+
+- **Novo pedido sem internet:** a tela aceita normalmente. O pedido fica guardado no aparelho
+  e sobe para o sistema quando a internet voltar. O número (PED-…) só é gerado na hora do
+  envio — até lá o pedido aparece na faixa azul como “aguardando envio”.
+- **Movimentação sem internet** (entrada e saída): igual. O saldo do estoque só é alterado
+  quando a operação chega ao sistema, então o saldo mostrado pode ficar desatualizado até lá.
+- **Faixa azul no topo da tela:** mostra quantas operações estão guardadas, com os botões
+  **Enviar agora**, **Ver lista** e, em cada item, **Tirar** (para apagar algo digitado errado).
+- **Envio automático:** a cada vez que a internet volta, o programa envia sozinho (e tenta
+  de novo a cada 45 segundos enquanto houver algo pendente).
+- **Se um envio não puder ser feito** (ex.: estoque insuficiente na hora de mandar), o item
+  fica marcado em vermelho com o motivo, nada é aplicado e nada é perdido.
+- **Não duplica:** o programa marca cada operação antes de enviar; se a conexão cair no meio,
+  ele percebe que já entrou e não lança duas vezes.
+- **O programa abre sem internet:** a tela e os arquivos do Firebase ficam guardados no
+  aparelho, então dá para abrir e lançar mesmo sem sinal.
+- Continuam precisando de internet: atender pedido, cancelar, excluir, editar pedido ou
+  produto, restaurar backup e ver os dados de outros usuários.
+- **Atenção:** o que está pendente fica guardado **neste aparelho**. Não limpe os dados do
+  navegador nem desinstale o app antes de enviar. A fila guarda até 200 operações.
+
+## Novidades da versão 4.6 (campo de CPF/CNPJ mais limpo)
+
+- Na aba **Etiquetas**, o campo **CPF / CNPJ (opcional)** não mostra mais aquele texto
+  pequeno embaixo (“CPF ou CNPJ”). O campo ficou só com o nome e a caixa de digitação.
+- O formato automático continua igual: você digita só os números e o programa coloca os
+  pontos, a barra e o traço sozinho.
+
 ## Novidades da versão 4.5 (toque no celular)
 
 Botões, atalhos e abas ficaram maiores e mais fáceis de acertar com o dedo.
@@ -246,7 +322,7 @@ etiquetas e relatórios continuam iguais).
   tremida, escura ou torta pode fazer o programa errar. Na primeira vez o programa baixa
   um leitor de texto (~15 MB) e por isso precisa de internet; depois fica mais rápido.
   A foto não é enviada para lugar nenhum: a leitura acontece no próprio celular/computador.
-- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (4.5).
+- **Créditos:** rodapé com o criador do programa (Rafael Antonio) e a versão (5.0).
 
 ## Como atualizar o site no GitHub
 No repositório: **Add file > Upload files** e envie estes arquivos, substituindo os antigos:

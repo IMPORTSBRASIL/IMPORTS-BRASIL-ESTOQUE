@@ -113,6 +113,12 @@ small{font-size:12.5px}
 .nftext summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
 .nftext pre{margin:8px 0 0;max-height:180px;overflow:auto;font-size:11.5px;line-height:1.45;white-space:pre-wrap;color:var(--ink-soft)}
 
+/* ---------- cadastro de produto: foto da etiqueta e aviso de duplicado (v5.0) ---------- */
+.dupbox{margin:12px 0 0;padding:12px 14px;border:1px solid #e0a800;border-radius:var(--r-sm);background:rgba(224,168,0,.12);font-size:13.5px;line-height:1.5}
+.dupbox .dup-t{font-weight:700;margin:0 0 4px}
+.dupbtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.pref{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;letter-spacing:.02em}
+
 /* ---------- navegação ---------- */
 .navwrap{
   position:sticky;top:0;z-index:6;margin:0 -18px 18px;padding:9px 18px;
@@ -456,6 +462,17 @@ select{background-color:var(--surface-soft)}
 :root[data-theme="light"] .syncbar{background:#fff8e8;border-color:#efcd8b;color:#5b4400}
 .syncbar .btn.ghost{background:transparent;border-color:rgba(240,165,60,.5);color:inherit}
 
+/* ---------- sem internet: fila guardada no aparelho (v4.7) ---------- */
+.offbar{background:rgba(91,83,232,.16);border-color:rgba(91,83,232,.6);color:#d9d7ff}
+:root[data-theme="light"] .offbar{background:#f1f0ff;border-color:#bab6f5;color:#2f2a86}
+.offbar .btn.ghost{background:transparent;border-color:rgba(91,83,232,.55);color:inherit}
+.offlist{flex:1 1 100%;margin:4px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.offlist li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 11px;font-size:13px;line-height:1.35}
+:root[data-theme="light"] .offlist li{background:#fff;border-color:#dcd9fb}
+.offlist .off-what{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.off-err{color:#ffb0b0;font-weight:650}
+:root[data-theme="light"] .off-err{color:#b3261e}
+
 /* barra inferior (celular) */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
@@ -604,7 +621,7 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 <button class="btn" id="l-btn" type="submit">Entrar</button></div>
 <p class="err" id="l-err" role="alert"></p>
 <button type="button" class="link" onclick="resetPass()">Esqueci a senha</button></form>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.5</strong></span></footer></div>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.0</strong></span></footer></div>
 
 <div id="app" style="display:none">
 <header class="appbar">
@@ -615,8 +632,9 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 </header>
 <div class="navwrap"><nav id="nav" aria-label="Seções"></nav></div>
 <div id="syncbar" class="syncbar" role="status" aria-live="polite" hidden></div>
+<div id="offbar" class="syncbar offbar" role="status" aria-live="polite" hidden></div>
 <div id="view"><div class="empty">Carregando…</div></div>
-<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>4.5</strong></span></footer>
+<footer class="credits"><span>Desenvolvido por <strong>Rafael Antonio</strong></span><span>•</span><span>Versão <strong>5.0</strong></span></footer>
 <div id="tabbar" class="tabbar" aria-label="Navegação rápida"></div>
 <div id="menu" class="drawer-wrap" hidden onclick="if(event.target===this)closeMenu()"><aside class="drawer" role="dialog" aria-modal="true" aria-label="Menu"><div id="menu-body"></div></aside></div>
 </div>
@@ -625,6 +643,7 @@ button,.btn,.tile,.notice,.mitem,.iconbtn,.avatar,nav button,summary{touch-actio
 <h2>Editar produto <span id="ed-sku" style="color:var(--muted);font-weight:400"></span></h2>
 <div class="row">
 <label style="flex:1 1 100%">Nome<input id="ed-name"></label>
+<label>Código / referência<input id="ed-ref" placeholder="Ex.: REF 4587"></label>
 <label>Tamanhos<input id="ed-sizes" placeholder="Ex.: P, M, G, GG"></label>
 <label style="flex:1 1 100%">Observações<textarea id="ed-notes"></textarea></label>
 <label>Quantidade em estoque<input id="ed-qty" type="number" min="0"></label>
@@ -660,9 +679,126 @@ var tm;function toast(t){var m=document.getElementById('msg');m.textContent=t;m.
 function fail(e){
   console.error(e);
   var c=e&&e.code,m=e&&e.message;
-  if(c==='unavailable'||/offline/i.test(m||''))m='Sem conexão com a internet. Tente novamente quando estiver online.';
+  if(c==='unavailable'||/offline/i.test(m||''))m='Sem conexão com a internet. Esta ação precisa de internet — tente de novo quando estiver online.';
   else if(c==='permission-denied')m='Sem permissão. Entre novamente no sistema.';
   toast(m||'Ocorreu um erro. Tente novamente.');
+}
+
+/* ---------- modo sem internet (v4.7): fila guardada no aparelho ---------- */
+var OFF_KEY='ib-fila-offline-v1',OFF_MAX=200,offlineQ=[],flushing=false,offOpen=false,offTimer=null;
+function offOnline(){return navigator.onLine!==false}
+function loadQueue(){
+  try{
+    var r=JSON.parse(localStorage.getItem(OFF_KEY)||'[]');
+    if(!Array.isArray(r))return [];
+    return r.filter(function(o){return o&&typeof o.id==='string'&&(o.kind==='order'||o.kind==='move')&&!isNaN(o.at)}).slice(0,OFF_MAX);
+  }catch(e){return []}
+}
+function saveQueue(){
+  try{localStorage.setItem(OFF_KEY,JSON.stringify(offlineQ))}catch(e){}
+  paintOffline();
+}
+function isOfflineError(e){
+  var c=e&&e.code,m=String((e&&e.message)||'');
+  return c==='unavailable'||/offline|network|unavailable/i.test(m);
+}
+function offErrText(e){return (e&&e.message)||'Não foi possível enviar.'}
+function offCount(){return offlineQ.length}
+function opText(op){
+  if(op.kind==='move')return (op.type||'Movimentação')+' · '+op.qty+' un. · '+(op.name||'produto')+(op.ref?' · '+op.ref:'');
+  var n=(op.items||[]).reduce(function(a,i){return a+(i.qty||0)},0);
+  return 'Novo pedido'+(op.city?' · '+op.city:'')+' · '+n+' un. em '+(op.items||[]).length+' item(ns)';
+}
+function enqueueOp(op){
+  op.at=op.at||Date.now();
+  op.by=op.by||(user?user.email:'');
+  offlineQ.push(op);
+  if(offlineQ.length>OFF_MAX)offlineQ.shift();
+  saveQueue();
+  return op;
+}
+function paintOffline(){
+  var b=document.getElementById('offbar');if(!b)return;
+  var pend=offlineQ.length,on=offOnline(),html='';
+  if(!pend&&on){b.hidden=true;b.innerHTML='';return}
+  if(!pend){
+    html='<span class="syncbar-txt"><strong>Sem internet.</strong> Novos pedidos e movimentações ficam guardados neste aparelho e vão para o sistema quando a conexão voltar.</span>';
+  }else{
+    var errs=offlineQ.filter(function(o){return o.error}).length;
+    html='<span class="syncbar-txt"><strong>'+(on?'':'Sem internet. ')+pend+' operação(ões) guardada(s)</strong> neste aparelho'+
+      (errs?' · <span class="off-err">'+errs+' com erro, veja a lista</span>':'')+'. '+
+      (flushing?'Enviando…':(on?'Aguardando envio.':'Será enviada quando a conexão voltar.'))+'</span>'+
+      '<button class="btn sm" onclick="flushQueue(true)">Enviar agora</button>'+
+      '<button class="btn ghost sm" onclick="offToggle()">'+(offOpen?'Esconder lista':'Ver lista')+'</button>';
+    if(offOpen)html+='<ul class="offlist">'+offlineQ.map(function(o,k){
+      return '<li><span class="off-what"><strong>'+esc(opText(o))+'</strong><br>'+fmt(o.at)+
+        (o.error?' · <span class="off-err">'+esc(o.error)+'</span>':' · aguardando envio')+'</span>'+
+        '<button class="btn ghost sm" onclick="offRemove('+k+')">Tirar</button></li>';
+    }).join('')+'</ul>';
+  }
+  b.innerHTML=html;b.hidden=false;
+}
+function offToggle(){offOpen=!offOpen;paintOffline()}
+function offRemove(k){
+  var op=offlineQ[k];if(!op)return;
+  if(!confirm('Tirar esta operação da fila? Ela não será enviada ao sistema, e o estoque e os pedidos não serão alterados.'))return;
+  offlineQ.splice(k,1);saveQueue();
+}
+/* envio de uma operação. O id já foi criado no aparelho, então reenviar não duplica */
+async function sendQueued(op){
+  if(!db)throw new Error('Sistema não conectado.');
+  if(op.kind==='move'){
+    var mref=db.collection('moves').doc(op.id);
+    await db.runTransaction(async function(t){
+      var md=await t.get(mref);if(md.exists)return;
+      var pref=db.collection('products').doc(op.pid),d=await t.get(pref);
+      if(!d.exists)throw new Error('O produto "'+(op.name||'')+'" não existe mais no estoque.');
+      var p=d.data();
+      if(op.type==='Saída'&&(p.qty||0)<op.qty)throw new Error('Estoque insuficiente para '+(p.name||'o produto')+': há '+(p.qty||0)+' unidade(s).');
+      t.update(pref,{qty:(p.qty||0)+(op.type==='Entrada'?op.qty:-op.qty)});
+      t.set(mref,{date:op.at,type:op.type,pid:op.pid,name:p.name,sku:p.sku,qty:op.qty,ref:op.ref||'',by:op.by||''});
+    });
+    return;
+  }
+  var oref=db.collection('orders').doc(op.id);
+  await db.runTransaction(async function(t){
+    var od=await t.get(oref);if(od.exists)return;
+    var cref=db.doc('meta/counters'),c=await t.get(cref);
+    var n=(c.exists&&c.data().seq)||S.seq||1;
+    op.num='PED-'+pad(n);
+    t.set(cref,{seq:n+1},{merge:true});
+    t.set(oref,{num:op.num,madeBy:op.madeBy,city:op.city,weight:op.weight||'',volume:op.volume||'',date:op.at,status:'Pendente',items:clean(op.items),by:op.by||''});
+  });
+  window._skipNotice=Date.now()+8000;
+}
+async function flushQueue(manual){
+  if(flushing)return;
+  if(!offlineQ.length){if(manual)toast('Nenhuma operação pendente.');return}
+  if(!user||!db)return;
+  if(!offOnline()){
+    paintOffline();
+    if(manual)toast('Sem internet ainda. As operações continuam guardadas neste aparelho.');
+    return;
+  }
+  flushing=true;paintOffline();
+  var sent=0,qerr=0,nums=[];
+  try{
+    for(var i=0;i<offlineQ.length;){
+      var op=offlineQ[i];
+      if(op.error){i++;continue}
+      try{
+        await sendQueued(op);
+        if(op.num)nums.push(op.num);
+        offlineQ.splice(i,1);saveQueue();sent++;
+      }catch(e){
+        if(isOfflineError(e))break;
+        op.error=offErrText(e);qerr++;i++;saveQueue();
+      }
+    }
+  }finally{flushing=false}
+  if(sent)toast(sent+' operação(ões) enviada(s) para o sistema.'+(nums.length?' Pedidos: '+nums.join(', ')+'.':''));
+  else if(qerr&&manual)toast('Algumas operações não puderam ser enviadas. Toque em "Ver lista" para ver o motivo.');
+  paintOffline();
 }
 function status(p){return p.qty<=0?'<span class="tag t-bad">Zerado</span>':p.qty<=p.min?'<span class="tag t-warn">Baixo</span>':'<span class="tag t-ok">Em estoque</span>'}
 function sizeOf(p){return (p&&p.sizes&&p.sizes.length)?' ('+esc(p.sizes.join(', '))+')':''}
@@ -783,11 +919,65 @@ function printStockReport(){
 }
 
 /* ---------- operações no banco (transações = seguras com vários usuários) ---------- */
-async function addProduct(){
+function normName(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,' ').trim();
+}
+function sizeKey(a){
+  return (Array.isArray(a)?a:[]).map(function(x){return String(x).toUpperCase().trim()})
+    .filter(Boolean).sort().join('|');
+}
+function findSame(name,sizes){
+  var nn=normName(name),sk=sizeKey(sizes);
+  if(!nn)return null;
+  return S.products.filter(function(p){return normName(p.name)===nn&&sizeKey(p.sizes)===sk})[0]||null;
+}
+function closeDup(){var b=document.getElementById('p-dup');if(b){b.hidden=true;b.innerHTML=''}}
+function askDup(dup,d){
+  window._dupId=dup.id;window._dupData=d;
+  var box=document.getElementById('p-dup');
+  if(!box)return toast('Este produto já existe no cadastro.');
+  box.hidden=false;
+  box.innerHTML='<p class="dup-t">Este produto já está cadastrado.</p>'+
+    esc(dup.sku)+' · '+esc(dup.name)+((dup.sizes&&dup.sizes.length)?' ('+esc(dup.sizes.join(', '))+')':'')+
+    ' — hoje com '+dup.qty+' un.'+(d.qty>0?' Você está cadastrando <b>'+d.qty+' un.</b>':'')+
+    '<div class="dupbtns">'+
+    (d.qty>0?'<button class="btn" onclick="addProductSum()">Somar '+d.qty+' un. ao estoque existente</button>':'')+
+    '<button class="btn ghost" onclick="addProduct(true)">Cadastrar como novo mesmo assim</button>'+
+    '<button class="btn ghost" onclick="closeDup()">Cancelar</button></div>';
+  if(box.scrollIntoView)box.scrollIntoView({block:'nearest',behavior:'smooth'});
+  toast('Este produto já existe. Escolha somar ao estoque ou cadastrar como novo.');
+}
+async function addProductSum(){
+  var id=window._dupId,d=window._dupData;
+  if(!id||!d)return;
+  if(!d.qty||d.qty<1)return toast('Informe a quantidade que chegou para somar.');
+  try{
+    await db.runTransaction(async function(t){
+      var ref=db.collection('products').doc(id),g=await t.get(ref);
+      if(!g.exists)throw new Error('Este produto foi excluído. Cadastre como novo.');
+      var p=g.data(),upd={qty:(Number(p.qty)||0)+d.qty};
+      if(d.ref&&!p.ref)upd.ref=d.ref;
+      if(d.min>(Number(p.min)||0))upd.min=d.min;
+      t.update(ref,upd);
+      t.set(db.collection('moves').doc(uid()),newMove(id,p,'Entrada',d.qty,'Cadastro somado'));
+    });
+    closeDup();
+    window._dupId=null;window._dupData=null;
+    toast('Somado ao estoque: +'+d.qty+' un. em '+d.name+'.');
+    render();
+  }catch(e){fail(e)}
+}
+async function addProduct(force){
   var name=val('p-name'),sizes=val('p-sizes').split(/[,\n;]+/).map(function(s){return s.trim().toUpperCase()}).filter(Boolean),
+    ref=String(val('p-ref')||'').trim().slice(0,40),
     notes=val('p-notes'),qty=parseInt(val('p-qty'))||0,min=parseInt(val('p-min'))||0;
   if(!name)return toast('Informe o nome do produto.');
   if(qty<0||min<0)return toast('Quantidades não podem ser negativas.');
+  if(!force){
+    var dup=findSame(name,sizes);
+    if(dup)return askDup(dup,{name:name,sizes:sizes,notes:notes,qty:qty,min:min,ref:ref});
+  }
   var id=uid(),sku;
   try{
     await db.runTransaction(async function(t){
@@ -795,10 +985,11 @@ async function addProduct(){
       var n=(c.exists&&c.data().sku)||0;
       sku='IMP-'+pad(n+1);
       t.set(cref,{sku:n+1},{merge:true});
-      var p={sku:sku,name:name,qty:qty,min:min,sizes:Array.from(new Set(sizes)),notes:notes};
+      var p={sku:sku,name:name,ref:ref,qty:qty,min:min,sizes:Array.from(new Set(sizes)),notes:notes};
       t.set(db.collection('products').doc(id),p);
       if(qty>0)t.set(db.collection('moves').doc(uid()),newMove(id,p,'Entrada',qty,'Estoque inicial'));
     });
+    closeDup();window._dupId=null;window._dupData=null;
     toast('Produto salvo. Código: '+sku);render();
   }catch(e){fail(e)}
 }
@@ -812,17 +1003,31 @@ async function doMove(){
   if(!pid)return toast('Cadastre um produto primeiro.');
   if(!qty||qty<1)return toast('Informe uma quantidade maior que zero.');
   if(type==='Saída'&&!ref)return toast('Informe o número do pedido para a saída.');
+  var p0=prod(pid),mid=uid(),payload={id:mid,kind:'move',pid:pid,name:p0?p0.name:'',type:type,qty:qty,ref:ref,at:Date.now(),by:user?user.email:''};
+  if(!offOnline()){
+    enqueueOp(payload);
+    toast('Sem internet: '+type.toLowerCase()+' guardada no aparelho. Vai para o sistema quando a conexão voltar.');
+    render();return;
+  }
   try{
     await db.runTransaction(async function(t){
+      var mref=db.collection('moves').doc(mid),md=await t.get(mref);
+      if(md.exists)return;
       var pr=db.collection('products').doc(pid),d=await t.get(pr);
       if(!d.exists)throw new Error('Produto não encontrado.');
       var p=d.data();
       if(type==='Saída'&&p.qty<qty)throw new Error('Estoque insuficiente: há '+p.qty+' unidades.');
       t.update(pr,{qty:p.qty+(type==='Entrada'?qty:-qty)});
-      t.set(db.collection('moves').doc(uid()),newMove(pid,p,type,qty,ref));
+      t.set(mref,{date:payload.at,type:type,pid:pid,name:p.name,sku:p.sku,qty:qty,ref:ref||'',by:payload.by});
     });
     toast(type+' registrada.');render();
-  }catch(e){fail(e)}
+  }catch(e){
+    if(isOfflineError(e)){
+      enqueueOp(payload);
+      toast('Sem internet: '+type.toLowerCase()+' guardada no aparelho. Vai para o sistema quando a conexão voltar.');
+      render();
+    }else fail(e);
+  }
 }
 function addDraft(){
   var pid=val('o-prod'),qty=parseInt(val('o-qty'));
@@ -847,17 +1052,35 @@ async function saveOrder(){
   if(!made)return toast('Informe quem fez o pedido.');
   if(!city)return toast('Informe a cidade de destino e o cliente.');
   if(!draft.length)return toast('Adicione ao menos um item.');
-  var num;window._skipNotice=Date.now()+8000;
+  var num,oid=uid(),at=Date.now(),items=clean(draft),by=user?user.email:'';
+  window._skipNotice=Date.now()+8000;
+  var payload={id:oid,kind:'order',madeBy:made,city:city,weight:weight,volume:volume,items:items,at:at,by:by};
+  var clearOrderForm=function(){
+    draft=[];window._made='';window._city='';window._oWeight='';window._oVolume='';window._oFree='';window._oFsize='';
+  };
+  if(!offOnline()){
+    enqueueOp(payload);clearOrderForm();
+    toast('Sem internet: pedido guardado neste aparelho. O número (PED-…) sai quando a conexão voltar.');
+    render();return;
+  }
   try{
     await db.runTransaction(async function(t){
+      var oref=db.collection('orders').doc(oid),od=await t.get(oref);
+      if(od.exists)return;
       var cref=db.doc('meta/counters'),c=await t.get(cref);
       var n=(c.exists&&c.data().seq)||S.seq||1;
       num='PED-'+pad(n);
       t.set(cref,{seq:n+1},{merge:true});
-      t.set(db.collection('orders').doc(uid()),{num:num,madeBy:made,city:city,weight:weight,volume:volume,date:Date.now(),status:'Pendente',items:clean(draft),by:user.email});
+      t.set(oref,{num:num,madeBy:made,city:city,weight:weight,volume:volume,date:at,status:'Pendente',items:items,by:by});
     });
-    draft=[];window._made='';window._city='';window._oWeight='';window._oVolume='';window._oFree='';window._oFsize='';toast('Pedido '+num+' criado.');render();
-  }catch(e){fail(e)}
+    clearOrderForm();toast('Pedido '+num+' criado.');render();
+  }catch(e){
+    if(isOfflineError(e)){
+      enqueueOp(payload);clearOrderForm();
+      toast('Sem internet: pedido guardado neste aparelho. O número (PED-…) sai quando a conexão voltar.');
+      render();
+    }else fail(e);
+  }
 }
 async function fulfill(id){
   window._skipNotice=Date.now()+8000;
@@ -1029,6 +1252,7 @@ function openEdit(id){
   window._edId=id;window._edQty=p.qty;
   document.getElementById('ed-sku').textContent=p.sku;
   document.getElementById('ed-name').value=p.name;
+  document.getElementById('ed-ref').value=p.ref||'';
   document.getElementById('ed-sizes').value=(p.sizes||[]).join(', ');
   document.getElementById('ed-notes').value=p.notes||'';
   document.getElementById('ed-qty').value=p.qty;
@@ -1040,7 +1264,7 @@ function closeEdit(){document.getElementById('modal').style.display='none';windo
 async function saveEdit(){
   var id=window._edId;if(!id)return;
   var name=val('ed-name'),sizes=val('ed-sizes').split(/[,\n;]+/).map(function(s){return s.trim().toUpperCase()}).filter(Boolean),
-    notes=val('ed-notes'),min=parseInt(val('ed-min')),qtyIn=parseInt(val('ed-qty'));
+    ref=String(val('ed-ref')||'').trim().slice(0,40),notes=val('ed-notes'),min=parseInt(val('ed-min')),qtyIn=parseInt(val('ed-qty'));
   if(!name)return toast('Informe o nome do produto.');
   if(isNaN(min)||min<0)return toast('Estoque mínimo inválido.');
   if(isNaN(qtyIn)||qtyIn<0)return toast('Quantidade inválida.');
@@ -1049,7 +1273,7 @@ async function saveEdit(){
     await db.runTransaction(async function(t){
       var ref=db.collection('products').doc(id),d=await t.get(ref);
       if(!d.exists)throw new Error('Este produto foi excluído por outro usuário.');
-      var p=d.data(),upd={name:name,sizes:Array.from(new Set(sizes)),notes:notes,min:min};
+      var p=d.data(),upd={name:name,ref:ref,sizes:Array.from(new Set(sizes)),notes:notes,min:min};
       if(changeQty){
         var diff=qtyIn-p.qty;
         upd.qty=qtyIn;
@@ -1391,8 +1615,6 @@ function docMask(el){
   if(!el)return;
   var d=docDigits(el.value),m=maskDoc(d);
   el.value=m;
-  var tag=document.getElementById('e-doc-type');
-  if(tag)tag.textContent=d.length?docType(d):'CPF ou CNPJ';
   try{el.setSelectionRange(m.length,m.length)}catch(e){}
 }
 function maskOnly(el){
@@ -1567,6 +1789,102 @@ async function readInvoice(input){
     if(input)input.value='';
   }
 }
+/* ---------- foto da etiqueta do produto: lê e preenche o cadastro (v5.0) ---------- */
+function pOcrStatus(msg,err){
+  var el=document.getElementById('p-ocr-status');
+  if(el){el.textContent=msg;el.style.color=err?'#b42318':''}
+}
+function parseProductText(raw){
+  var out={name:'',ref:'',sizes:[]};
+  var t=String(raw||'').replace(/\r/g,'').replace(/[\u00a0]/g,' ');
+  var lines=t.split('\n').map(function(l){return l.replace(/[ \t]+/g,' ').trim()}).filter(Boolean);
+  function clean(s){return String(s||'').replace(/^[:\-\u2013\s]+/,'').replace(/\s{2,}/g,' ').trim()}
+  /* referencia / codigo do fornecedor */
+  var m=t.match(/\bREF(?:ER[ÊE]NCIA)?\s*[.:\-]?\s*([A-Za-z0-9][A-Za-z0-9._\/\-]{1,24})/i)||
+        t.match(/\bC[ÓO]D(?:IGO)?\s*[.:\-]?\s*([A-Za-z0-9][A-Za-z0-9._\/\-]{2,24})/i)||
+        t.match(/\bMODELO\s*[.:\-]?\s*([A-Za-z0-9][A-Za-z0-9._\/\-]{1,24})/i);
+  if(m)out.ref=String(m[1]).replace(/[.\-\/:]+$/,'').toUpperCase();
+  if(!out.ref){var b=t.match(/\b\d{8}\b|\b\d{12,14}\b/);if(b)out.ref=b[0]}
+  /* nome: linha com "descrição/produto/nome", senão a linha com mais letras */
+  var byKey='';
+  lines.forEach(function(l){
+    if(byKey)return;
+    var k=l.match(/^(DESCRI[ÇC][ÃA]O|DESC\.?|PRODUTO|NOME(?:\s+DO\s+PRODUTO)?|ITEM)\s*[:\-]?\s*(.+)$/i);
+    if(k&&clean(k[2]).length>=3)byKey=clean(k[2]);
+  });
+  if(!byKey){
+    var best=0;
+    lines.forEach(function(l){
+      if(/\b(CNPJ|CPF|CEP|TEL|FONE|WHATS|SITE|WWW|INSCRI|VALIDADE|LOTE|QTD|QUANT|PESO)\b/i.test(l))return;
+      var letters=(l.match(/[A-Za-zÀ-ÿ]/g)||[]).length,digits=(l.match(/\d/g)||[]).length;
+      if(letters<4||l.length>64)return;
+      var sc=letters-digits*2;
+      if(sc>best){best=sc;byKey=l}
+    });
+  }
+  out.name=clean(byKey).slice(0,80);
+  /* tamanhos: "TAM: P M G" / "TAMANHOS P, M, G" */
+  var szm=t.match(/\bTAM(?:ANHOS?)?\s*[.:\-]?\s*([A-Za-z0-9\/, ]{1,40})/i);
+  if(szm){
+    var parts=szm[1].split(/[\s,;\/]+/),keep=[];
+    for(var i=0;i<parts.length;i++){
+      var s=parts[i].trim().toUpperCase();
+      if(!s)continue;
+      if(/:$/.test(s))break;            /* parou em "COR:", "REF:" etc. */
+      if(/^[A-Z0-9]{1,4}$/.test(s))keep.push(s);
+    }
+    out.sizes=keep;
+  }
+  return out;
+}
+function applyProductData(d){
+  var got=[];
+  function fill(id,value,label){
+    if(!value)return;
+    var el=document.getElementById(id);if(!el)return;
+    if(String(el.value||'').trim())return; /* não apaga o que a pessoa já digitou */
+    el.value=value;got.push(label);
+  }
+  fill('p-name',d.name,'nome');
+  fill('p-ref',d.ref,'referência');
+  fill('p-sizes',(d.sizes||[]).join(', '),'tamanhos');
+  return got;
+}
+function pickProductPhoto(){var i=document.getElementById('p-photo');if(i){i.value='';i.click()}}
+async function readProductPhoto(input){
+  var f=input&&input.files&&input.files[0];
+  if(!f)return;
+  if(!/^image\//.test(f.type))return toast('Escolha uma foto da etiqueta do produto.');
+  if(f.size>12*1024*1024)return toast('A foto é muito grande. Use uma imagem menor que 12 MB.');
+  pOcrStatus('Preparando a foto…');
+  try{
+    var img=await nfImage(f);
+    pOcrStatus('Baixando o leitor de texto (só na primeira vez)…');
+    var T=await loadTesseract();
+    var worker=await T.createWorker('por',1,{logger:function(m){
+      if(m&&m.status==='recognizing text')pOcrStatus('Lendo a etiqueta… '+Math.round((m.progress||0)*100)+'%');
+    }});
+    try{await worker.setParameters({preserve_interword_spaces:'1'})}catch(e){}
+    var r=await worker.recognize(img);
+    await worker.terminate();
+    var txt=(r&&r.data&&r.data.text)||'';
+    var pre=document.getElementById('p-ocr-pre'),box=document.getElementById('p-ocr-text');
+    if(pre)pre.textContent=txt.trim()||'(nenhum texto encontrado)';
+    if(box)box.hidden=!txt.trim();
+    var d=parseProductText(txt);
+    var got=applyProductData(d);
+    if(!got.length){
+      pOcrStatus('Não identifiquei dados novos nesta foto (ou os campos já estavam preenchidos). Preencha à mão ou tire outra foto, mais reta e com boa luz.',true);
+      return;
+    }
+    pOcrStatus('Preenchi: '+got.join(', ')+'. Confira antes de salvar.');
+    toast('Etiqueta lida. Confira os campos antes de salvar.');
+  }catch(e){
+    pOcrStatus(e&&e.message==='internet'?'Sem internet para baixar o leitor de texto. Tente quando estiver conectado.':'Não consegui ler esta foto. Tente outra, mais nítida e sem sombra.',true);
+  }finally{
+    if(input)input.value='';
+  }
+}
 function labelFor(id){window._pre=id;go('etiquetas')}
 function initLabelTab(){
   try{
@@ -1619,7 +1937,7 @@ function vEtiquetas(){
   '<div class="row">'+
   '<label style="flex:1 1 100%">Pedido<select id="e-order" onchange="fillLabel()"><option value="">Etiqueta avulsa (digitar)</option>'+os+'</select></label>'+
   '<label style="flex:2 1 220px">Destinatário<input id="e-client"></label>'+
-  '<label style="flex:1 1 190px">CPF / CNPJ (opcional)<input id="e-doc" maxlength="18" inputmode="numeric" placeholder="Só os números" oninput="docMask(this)"><span id="e-doc-type" style="font-size:11.5px;font-weight:400">CPF ou CNPJ</span></label>'+
+  '<label style="flex:1 1 190px">CPF / CNPJ (opcional)<input id="e-doc" maxlength="18" inputmode="numeric" placeholder="Só os números" oninput="docMask(this)"></label>'+
   '<label style="flex:1 1 130px">Peso (opcional)<input id="e-weight" maxlength="12" placeholder="Ex.: 2,5 kg"></label>'+
   '<label style="flex:2 1 200px">Cidade / UF de destino<input id="e-city" list="cities" placeholder="Ex.: Joinville / SC"></label>'+
   '<label style="flex:1 1 100%">Endereço / observações (opcional)<textarea id="e-addr" placeholder="Rua, número, bairro, CEP, telefone…"></textarea></label>'+
@@ -1701,7 +2019,7 @@ function fillMenu(){
     '<button class="mitem" onclick="toggleTheme()">'+svg('tema')+'<span>Tema '+(light?'escuro':'claro')+'</span></button>'+
     '<button class="mitem" onclick="downloadBackup()">'+svg('backup')+'<span>Baixar backup</span></button>'+
     '<button class="mitem danger" onclick="logout()">'+svg('sair')+'<span>Sair da conta</span></button>'+
-    '<p class="mfoot">IMPORTS BRASIL · Versão 4.5<br>Desenvolvido por Rafael Antonio</p>';
+    '<p class="mfoot">IMPORTS BRASIL · Versão 5.0<br>Desenvolvido por Rafael Antonio</p>';
 }
 function openMenu(){var m=document.getElementById('menu');if(!m)return;fillMenu();m.hidden=false;document.body.style.overflow='hidden'}
 function closeMenu(){var m=document.getElementById('menu');if(!m)return;m.hidden=true;document.body.style.overflow=''}
@@ -1714,15 +2032,20 @@ function toggleTheme(){
 
 /* ---------- telas ---------- */
 function vEstoque(){
-  var list=S.products.filter(function(p){var t=(p.sku+' '+p.name+' '+(p.sizes||[]).join(' ')+' '+(p.notes||'')).toLowerCase();return t.indexOf(q.toLowerCase())>-1});
-  var rows=list.map(function(p){return '<tr><td>'+esc(p.sku)+'</td><td>'+esc(p.name)+'</td><td>'+esc((p.sizes||[]).join(', ')||'—')+'</td><td>'+esc(p.notes||'—')+'</td><td class="n">'+p.qty+'</td><td class="n">'+p.min+'</td><td>'+status(p)+'</td><td><button class="btn ghost sm" onclick="openEdit(\''+p.id+'\')">Editar</button> <button class="btn danger sm" onclick="delProduct(\''+p.id+'\')">Excluir</button></td></tr>'}).join('');
-  return '<div class="card"><h2>Novo produto</h2><p style="color:var(--muted);font-size:13px;margin:0 0 10px">O código será gerado automaticamente ao salvar.</p><div class="row">'+
-  '<label style="flex:2 1 200px">Nome<input id="p-name"></label><label>Tamanhos / Variações<input id="p-sizes" placeholder="Ex.: P, M, G, GG ou 10ml, 20ml"></label>'+
+  var list=S.products.filter(function(p){var t=(p.sku+' '+p.name+' '+(p.ref||'')+' '+(p.sizes||[]).join(' ')+' '+(p.notes||'')).toLowerCase();return t.indexOf(q.toLowerCase())>-1});
+  var rows=list.map(function(p){return '<tr><td>'+esc(p.sku)+'</td><td>'+esc(p.name)+(p.ref?'<small class="pref">'+esc(p.ref)+'</small>':'')+'</td><td>'+esc((p.sizes||[]).join(', ')||'—')+'</td><td>'+esc(p.notes||'—')+'</td><td class="n">'+p.qty+'</td><td class="n">'+p.min+'</td><td>'+status(p)+'</td><td><button class="btn ghost sm" onclick="openEdit(\''+p.id+'\')">Editar</button> <button class="btn danger sm" onclick="delProduct(\''+p.id+'\')">Excluir</button></td></tr>'}).join('');
+  return '<div class="card"><h2>Novo produto</h2><p style="color:var(--muted);font-size:13px;margin:0 0 10px">O código será gerado automaticamente ao salvar. Se o produto já existir (mesmo nome e mesmos tamanhos), o programa avisa antes de duplicar.</p><div class="row">'+
+  '<label style="flex:2 1 200px">Nome<input id="p-name"></label><label style="flex:1 1 180px">Código / referência da etiqueta (opcional)<input id="p-ref" placeholder="Ex.: REF 4587, EAN…"></label>'+
+  '<label>Tamanhos / Variações<input id="p-sizes" placeholder="Ex.: P, M, G, GG ou 10ml, 20ml"></label>'+
   '<label style="flex:2 1 220px">Observações<textarea id="p-notes" placeholder="Detalhes adicionais do produto"></textarea></label>'+
   '<label>Qtd. inicial<input id="p-qty" type="number" min="0" value="0"></label><label>Estoque mínimo<input id="p-min" type="number" min="0" value="0"></label>'+
+  '<div class="nfrow" style="flex:1 1 100%"><button type="button" class="btn ghost" onclick="pickProductPhoto()">Fotografar etiqueta do produto</button><small id="p-ocr-status">Fotografe a etiqueta impressa da embalagem: o programa tenta preencher nome, referência e tamanhos. Confira antes de salvar. Precisa de internet na primeira vez.</small></div>'+
+  '<details class="nftext" id="p-ocr-text" hidden style="flex:1 1 100%"><summary>Texto que o programa leu na foto</summary><pre id="p-ocr-pre"></pre></details>'+
+  '<div id="p-dup" class="dupbox" hidden style="flex:1 1 100%"></div>'+
+  '<input id="p-photo" type="file" accept="image/*" hidden onchange="readProductPhoto(this)">'+
   '<button class="btn" onclick="addProduct()">Salvar produto</button></div></div>'+
   '<div class="card"><div class="listhead"><div><h2 style="margin:0">Produtos cadastrados</h2><small style="color:var(--muted)">'+S.products.length+' no cadastro'+(q?' · '+list.length+' encontrado(s)':'')+'</small></div><button class="btn ghost sm" id="list-toggle" onclick="toggleList()" aria-controls="stock-list" aria-expanded="'+((listOpen||q)?'true':'false')+'">'+((listOpen||q)?'Recolher':'Expandir')+'</button></div>'+
-  '<div class="row" style="margin:12px 0 10px"><label style="flex:1 1 240px">Buscar<input id="q" value="'+esc(q)+'" oninput="q=this.value;render(true,\'q\')" placeholder="Código, nome, tamanho ou observação"></label></div>'+
+  '<div class="row" style="margin:12px 0 10px"><label style="flex:1 1 240px">Buscar<input id="q" value="'+esc(q)+'" oninput="q=this.value;render(true,\'q\')" placeholder="Código, nome, referência, tamanho ou observação"></label></div>'+
   '<div id="stock-list"'+((listOpen||q)?'':' hidden')+'>'+(list.length?'<div class="scroll"><table class="t-estoque"><thead><tr><th>Código</th><th>Produto</th><th>Tamanhos</th><th>Observações</th><th class="n">Qtd.</th><th class="n">Mínimo</th><th>Situação</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">'+(S.products.length?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Preencha o formulário acima para começar.')+'</div>')+  '</div></div>'+vGrupos()+
   '<div class="card"><h2>Backup e restauração</h2><p style="color:var(--muted);font-size:13px">Baixe um arquivo JSON com todos os dados da empresa. A restauração substitui os dados atuais para todos os usuários. Também serve para importar os dados da versão antiga (que ficava só no aparelho).</p>'+
   '<button class="btn ghost" onclick="downloadBackup()">Baixar backup</button> <button class="btn ghost" onclick="document.getElementById(\'backup-file\').click()">Importar backup</button>'+
@@ -1953,7 +2276,10 @@ async function resetPass(){
   try{await auth.sendPasswordResetEmail(em);err.textContent='Se este e-mail estiver cadastrado, você receberá um link para criar nova senha.'}
   catch(e){err.textContent=loginError(e)}
 }
-function logout(){if(confirm('Sair do sistema?')){closeMenu();auth.signOut()}}
+function logout(){
+  var av=offlineQ.length?'\n\nAtenção: há '+offlineQ.length+' operação(ões) ainda não enviada(s). Elas ficam guardadas neste aparelho e serão enviadas no próximo login com internet.':'';
+  if(confirm('Sair do sistema?'+av)){closeMenu();auth.signOut()}
+}
 var ordersLoaded=false;
 function stopListening(){unsubs.forEach(function(u){u()});unsubs=[];ready={p:false,o:false,m:false,c:false};S={products:[],orders:[],moves:[],users:[],seq:1};ordersLoaded=false;hideSync()}
 function startListening(){
@@ -1981,6 +2307,9 @@ function startListening(){
   unsubs.push(db.collection('users').onSnapshot(function(s){
     S.users=s.docs.map(function(d){return Object.assign({email:d.id},d.data())});
   },function(){}));
+  /* enquanto houver fila offline, tenta enviar de tempos em tempos */
+  if(offTimer){clearInterval(offTimer);offTimer=null}
+  offTimer=setInterval(function(){if(offlineQ.length&&offOnline()&&user)flushQueue()},45000);
 }
 function boot(){
   var cfg=window.FIREBASE_CONFIG;
@@ -1994,13 +2323,16 @@ function boot(){
   auth.onAuthStateChanged(function(u){
     user=u;stopListening();
     if(u){
-      var w=document.getElementById('who');if(w)w.title=u.email;var wi=document.getElementById('who-ini');if(wi)wi.textContent=ini(u.email);show('app');render();startListening();
+      var w=document.getElementById('who');if(w)w.title=u.email;var wi=document.getElementById('who-ini');if(wi)wi.textContent=ini(u.email);show('app');render();startListening();paintOffline();flushQueue();
       db.collection('users').doc(u.email).set({email:u.email,lastSeen:Date.now()},{merge:true}).catch(function(){});
     }
     else{show('login')}
   });
 }
 boot();
+offlineQ=loadQueue();paintOffline();
+window.addEventListener('online',function(){paintOffline();flushQueue()});
+window.addEventListener('offline',function(){paintOffline()});
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
 
 </script>
